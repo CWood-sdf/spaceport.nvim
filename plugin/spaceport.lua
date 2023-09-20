@@ -95,9 +95,24 @@ local function addLine(lines, line, width)
     local paddingStr = string.rep(" ", padding)
     table.insert(lines, paddingStr .. line)
 end
+local function cd(data, count, rawData)
+    local dir = data[count]
+    if dir == nil then
+        return
+    end
+    if dir.isDir then
+        vim.cmd("cd " .. dir.dir)
+        vim.cmd("Ex")
+    else
+        vim.cmd("edit " .. dir.dir)
+    end
+    rawData[dir.dir].time = getSeconds()
+    writeData(rawData)
+end
 vim.api.nvim_create_autocmd({ "UiEnter" }, {
     callback = function()
         if vim.fn.argc() == 0 then
+            local linesToDir = {}
             local buf = vim.api.nvim_create_buf(false, true)
             vim.api.nvim_buf_set_option(buf, "buftype", "nofile")
             vim.api.nvim_buf_set_option(buf, "bufhidden", "wipe")
@@ -118,18 +133,17 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
                 if count == nil or count == 0 then
                     count = 1
                 end
-                local dir = data[count]
-                if dir == nil then
+                cd(data, count, rawData)
+            end, {
+                buffer = buf,
+            })
+            vim.keymap.set('n', '<CR>', function()
+                local line = vim.fn.line('.')
+                local count = linesToDir[line]
+                if count == nil then
                     return
                 end
-                if dir.isDir then
-                    vim.cmd("cd " .. dir.dir)
-                    vim.cmd("Ex")
-                else
-                    vim.cmd("edit " .. dir.dir)
-                end
-                rawData[dir.dir].time = getSeconds()
-                writeData(rawData)
+                cd(data, count, rawData)
             end, {
                 buffer = buf,
             })
@@ -196,6 +210,7 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
                 -- end
                 -- vim.api.nvim_buf_set_lines(buf, -1, -1, false, { line })
                 local indexStr = "" .. index
+                linesToDir[#lines + 1] = index
                 addLine(lines, line .. string.rep(" ", 0 - #line + maxNameLen + 2 - #indexStr) .. index, width)
                 index = index + 1
             end
