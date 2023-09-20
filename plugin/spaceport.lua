@@ -195,7 +195,8 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
                 --     line = line .. " " .. vim.fn.strftime("%Y-%m-%d", v.time)
                 -- end
                 -- vim.api.nvim_buf_set_lines(buf, -1, -1, false, { line })
-                addLine(lines, line .. string.rep(" ", 0 - #line + maxNameLen + 1) .. index, width)
+                local indexStr = "" .. index
+                addLine(lines, line .. string.rep(" ", 0 - #line + maxNameLen + 2 - #indexStr) .. index, width)
                 index = index + 1
             end
             vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
