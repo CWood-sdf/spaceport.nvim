@@ -191,9 +191,9 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
                     end
                 end
                 local line = v.dir
-                if not isYesterday(v.time) and not isToday(v.time) then
-                    line = line .. " " .. vim.fn.strftime("%Y-%m-%d", v.time)
-                end
+                -- if not isYesterday(v.time) and not isToday(v.time) then
+                --     line = line .. " " .. vim.fn.strftime("%Y-%m-%d", v.time)
+                -- end
                 -- vim.api.nvim_buf_set_lines(buf, -1, -1, false, { line })
                 addLine(lines, line .. string.rep(" ", 0 - #line + maxNameLen + 1) .. index, width)
                 index = index + 1
