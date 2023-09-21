@@ -147,6 +147,7 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
             end, {
                 buffer = buf,
             })
+
             local lines = {}
             -- vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "Yo sdf", "" })
             local width = vim.o.columns
