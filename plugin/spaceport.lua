@@ -60,6 +60,39 @@ local function writeData(data)
     file:close()
 end
 
+local data = {}
+local pinnedData = {}
+local linesToDir = {}
+local rawData = {}
+local buf = nil
+local function refreshLocals()
+    rawData = readData()
+    if rawData == nil then
+        return
+    end
+    for k, v in pairs(rawData) do
+        local insert = {
+            dir = k,
+            time = v.time,
+            isDir = v.isDir,
+            pinNumber = v.pinNumber,
+            prettyDir = modFns._fixDir(k),
+        }
+        if v.pinNumber == 0 then
+            table.insert(data, insert)
+        else
+            table.insert(pinnedData, insert)
+        end
+    end
+    table.sort(data, function(a, b)
+        return a.time > b.time
+    end)
+
+    table.sort(pinnedData, function(a, b)
+        return a.pinNumber < b.pinNumber
+    end)
+end
+
 --- Check if a directory exists in this path
 local function isdir(path)
     -- "/" works on both Unix and Windows
@@ -113,7 +146,7 @@ end
 
 local debugData = {}
 local DEBUG = false
-local function cd(data, pinnedData, count, rawData)
+local function cd(count)
     local dir = ""
     if count <= #pinnedData then
         dir = pinnedData[count]
@@ -133,7 +166,7 @@ local function cd(data, pinnedData, count, rawData)
     writeData(rawData)
 end
 
-local function render(data, pinnedData, linesToDir, buf)
+local function render()
     local lines = {}
     -- vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "Yo sdf", "" })
     local width = vim.o.columns
@@ -148,6 +181,7 @@ local function render(data, pinnedData, linesToDir, buf)
     addLine(lines, "Toggle pin" .. string.rep(" ", 29) .. "t", width)
     addLine(lines, "Move pin down" .. string.rep(" ", 26) .. "J", width)
     addLine(lines, "Move pin up" .. string.rep(" ", 28) .. "K", width)
+    addLine(lines, "Refresh from disk" .. string.rep(" ", 22) .. "R", width)
 
     local index = 1
     local maxNameLen = 0
@@ -219,12 +253,23 @@ local function render(data, pinnedData, linesToDir, buf)
         addLine(lines, line .. string.rep(" ", 0 - #line + maxNameLen + 2 - #indexStr) .. index, width)
         index = index + 1
     end
+    if buf == nil then
+        buf = vim.api.nvim_create_buf(false, true)
+    end
     vim.api.nvim_buf_set_option(buf, "modifiable", true)
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
     vim.api.nvim_buf_set_option(buf, "modifiable", false)
 end
 
-local function remap(data, pinnedData, linesToDir, rawData, buf)
+local function remap()
+    vim.keymap.set("n", "R", function()
+        data = {}
+        pinnedData = {}
+        linesToDir = {}
+        rawData = {}
+        refreshLocals()
+        render()
+    end)
     vim.keymap.set("n", "J", function()
         local line = vim.fn.line('.')
         local count = linesToDir[line]
@@ -263,7 +308,7 @@ local function remap(data, pinnedData, linesToDir, rawData, buf)
             return a.pinNumber < b.pinNumber
         end)
         writeData(rawData)
-        render(data, pinnedData, linesToDir, buf)
+        render()
     end)
     vim.keymap.set("n", "K", function()
         local line = vim.fn.line('.')
@@ -303,7 +348,7 @@ local function remap(data, pinnedData, linesToDir, rawData, buf)
             return a.pinNumber < b.pinNumber
         end)
         writeData(rawData)
-        render(data, pinnedData, linesToDir, buf)
+        render()
     end)
     vim.keymap.set("n", "t", function()
         local count = vim.v.count
@@ -338,7 +383,6 @@ local function remap(data, pinnedData, linesToDir, rawData, buf)
                     maxPinNumber = v.pinNumber
                 end
             end
-            print(maxPinNumber)
             rawData[data[count - #pinnedData].dir].pinNumber = maxPinNumber + 1
             table.insert(pinnedData, data[count - #pinnedData])
             table.remove(data, count - #pinnedData + 1)
@@ -358,7 +402,7 @@ local function remap(data, pinnedData, linesToDir, rawData, buf)
             end
         end
         linesToDir = {}
-        render(data, pinnedData, linesToDir, buf)
+        render()
     end, {
         buffer = buf,
     })
@@ -368,55 +412,42 @@ local function remap(data, pinnedData, linesToDir, rawData, buf)
             local line = vim.fn.line('.')
             count = linesToDir[line]
         end
-        cd(data, pinnedData, count, rawData)
+        cd(count)
     end, {
         buffer = buf,
     })
 end
+
+local function mainRender()
+    data = {}
+    pinnedData = {}
+    linesToDir = {}
+    rawData = {}
+
+    if buf == nil or not vim.api.nvim_buf_is_valid(buf) then
+        buf = vim.api.nvim_create_buf(false, true)
+    end
+    vim.api.nvim_buf_set_option(buf, "buftype", "nofile")
+    vim.api.nvim_buf_set_option(buf, "bufhidden", "wipe")
+    vim.api.nvim_buf_set_option(buf, "swapfile", false)
+    -- vim.api.nvim_buf_set_option(buf, "number", false)
+    vim.api.nvim_set_current_buf(buf)
+    vim.cmd("setlocal norelativenumber nonumber")
+    refreshLocals()
+
+    remap()
+    render()
+end
+vim.api.nvim_create_user_command("Spaceport", function()
+    mainRender()
+end, {})
 vim.api.nvim_create_autocmd({ "UiEnter" }, {
     callback = function()
         if vim.fn.argc() == 0 then
-            local linesToDir = {}
-            local buf = vim.api.nvim_create_buf(false, true)
-            vim.api.nvim_buf_set_option(buf, "buftype", "nofile")
-            vim.api.nvim_buf_set_option(buf, "bufhidden", "wipe")
-            vim.api.nvim_buf_set_option(buf, "swapfile", false)
-            -- vim.api.nvim_buf_set_option(buf, "number", false)
-            vim.api.nvim_set_current_buf(buf)
-            vim.cmd("setlocal norelativenumber nonumber")
-            local rawData = readData()
-            if rawData == nil then
-                return
-            end
-            local data = {}
-            local pinnedData = {}
-            for k, v in pairs(rawData) do
-                local insert = {
-                    dir = k,
-                    time = v.time,
-                    isDir = v.isDir,
-                    pinNumber = v.pinNumber,
-                    prettyDir = modFns._fixDir(k),
-                }
-                if v.pinNumber == 0 then
-                    table.insert(data, insert)
-                else
-                    table.insert(pinnedData, insert)
-                end
-            end
-            table.sort(data, function(a, b)
-                return a.time > b.time
-            end)
-
-            table.sort(pinnedData, function(a, b)
-                return a.pinNumber < b.pinNumber
-            end)
-
-            remap(data, pinnedData, linesToDir, rawData, buf)
-            render(data, pinnedData, linesToDir, buf)
+            mainRender()
         elseif vim.fn.argc() > 0 then
             -- dir = vim.fn.argv()[1]
-            local data = readData()
+            local dataToWrite = readData()
             local time = getSeconds()
             local argv = vim.fn.argv() or {}
             if type(argv) == "string" then
@@ -427,17 +458,18 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
                 if not isdir(v) then
                     v = vim.fn.fnamemodify(v, ":p") or ""
                 end
-                if data[v] == nil then
-                    data[v] = {
+                if dataToWrite[v] == nil then
+                    dataToWrite[v] = {
                         time = time,
                         isDir = isDir,
+                        pinNumber = 0,
                     }
                 else
-                    data[v].time = time
-                    data[v].isDir = isDir
+                    dataToWrite[v].time = time
+                    dataToWrite[v].isDir = isDir
                 end
             end
-            writeData(data)
+            writeData(dataToWrite)
         end
     end
 })
