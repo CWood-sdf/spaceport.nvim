@@ -1,4 +1,5 @@
 -- local dir = ""
+local modFns = require("spaceport")
 local dataPath = vim.fn.stdpath("data")
 local dataDir = dataPath .. "/spaceport.json"
 --- Check if a file or directory exists in this path
@@ -148,20 +149,20 @@ local function render(data, pinnedData, linesToDir, buf)
     local index = 1
     local maxNameLen = 0
     for _, v in pairs(data) do
-        if #v.dir > maxNameLen then
-            maxNameLen = #v.dir + 10
+        if #v.prettyDir > maxNameLen then
+            maxNameLen = #v.prettyDir + 10
         end
     end
     for _, v in pairs(pinnedData) do
-        if #v.dir > maxNameLen then
-            maxNameLen = #v.dir + 10
+        if #v.prettyDir > maxNameLen then
+            maxNameLen = #v.prettyDir + 10
         end
     end
     if #pinnedData ~= 0 then
         addLine(lines, "", width)
         addLine(lines, "Pinned", width)
         for _, v in pairs(pinnedData) do
-            local line = v.dir
+            local line = v.prettyDir
             local indexStr = "" .. index
             linesToDir[#lines + 1] = index
             addLine(lines, line .. string.rep(" ", 0 - #line + maxNameLen + 2 - #indexStr) .. index, width)
@@ -201,7 +202,7 @@ local function render(data, pinnedData, linesToDir, buf)
                 addLine(lines, currentTime, width)
             end
         end
-        local line = v.dir
+        local line = v.prettyDir
         local indexStr = "" .. index
         linesToDir[#lines + 1] = index
         addLine(lines, line .. string.rep(" ", 0 - #line + maxNameLen + 2 - #indexStr) .. index, width)
@@ -352,6 +353,7 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
                     time = v.time,
                     isDir = v.isDir,
                     pinNumber = v.pinNumber,
+                    prettyDir = modFns._fixDir(k),
                 }
                 if v.pinNumber == 0 then
                     table.insert(data, insert)
