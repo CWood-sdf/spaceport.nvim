@@ -110,6 +110,9 @@ local function addLine(lines, line, width)
     local paddingStr = string.rep(" ", padding)
     table.insert(lines, paddingStr .. line)
 end
+
+local debugData = {}
+local DEBUG = false
 local function cd(data, pinnedData, count, rawData)
     local dir = ""
     if count <= #pinnedData then
@@ -156,6 +159,14 @@ local function render(data, pinnedData, linesToDir, buf)
     for _, v in pairs(pinnedData) do
         if #v.prettyDir > maxNameLen then
             maxNameLen = #v.prettyDir + 10
+        end
+    end
+    if DEBUG then
+        addLine(lines, "", width)
+        addLine(lines, "Debug", width)
+        for _, v in pairs(debugData) do
+            local line = v
+            addLine(lines, line, width)
         end
     end
     if #pinnedData ~= 0 then
@@ -227,6 +238,14 @@ local function remap(data, pinnedData, linesToDir, rawData, buf)
         if inc == nil or inc == 0 then
             inc = 1
         end
+        if DEBUG then
+            debugData = {}
+            local index = 1
+            for _, v in pairs(pinnedData) do
+                debugData[index] = v.pinNumber .. " " .. v.prettyDir
+                index = index + 1
+            end
+        end
         local startNumber = pinnedData[count].pinNumber + 0
         pinnedData[count].pinNumber = pinnedData[count].pinNumber + inc
         rawData[pinnedData[count].dir].pinNumber = pinnedData[count].pinNumber
@@ -259,6 +278,14 @@ local function remap(data, pinnedData, linesToDir, rawData, buf)
         if inc == nil or inc == 0 then
             inc = 1
         end
+        if DEBUG then
+            debugData = {}
+            local index = 1
+            for _, v in pairs(pinnedData) do
+                debugData[index] = v.pinNumber .. " " .. v.prettyDir
+                index = index + 1
+            end
+        end
         local startNumber = pinnedData[count].pinNumber + 0
         pinnedData[count].pinNumber = pinnedData[count].pinNumber - inc
         rawData[pinnedData[count].dir].pinNumber = pinnedData[count].pinNumber
@@ -288,6 +315,7 @@ local function remap(data, pinnedData, linesToDir, rawData, buf)
         if count == nil or count == 0 then
             count = 1
         end
+
         if count <= #pinnedData then
             local pinNumber = pinnedData[count].pinNumber
             rawData[pinnedData[count].dir].pinNumber = 0
@@ -297,8 +325,9 @@ local function remap(data, pinnedData, linesToDir, rawData, buf)
                 return a.time > b.time
             end)
             for _, v in pairs(pinnedData) do
-                if v.pinNumber > pinNumber then
+                if v.pinNumber >= pinNumber then
                     rawData[v.dir].pinNumber = v.pinNumber - 1
+                    v.pinNumber = v.pinNumber - 1
                 end
             end
             writeData(rawData)
@@ -309,10 +338,24 @@ local function remap(data, pinnedData, linesToDir, rawData, buf)
                     maxPinNumber = v.pinNumber
                 end
             end
+            print(maxPinNumber)
             rawData[data[count - #pinnedData].dir].pinNumber = maxPinNumber + 1
             table.insert(pinnedData, data[count - #pinnedData])
             table.remove(data, count - #pinnedData + 1)
+            pinnedData[maxPinNumber + 1].pinNumber = maxPinNumber + 1
+            table.sort(pinnedData, function(a, b)
+                return a.pinNumber < b.pinNumber
+            end)
             writeData(rawData)
+        end
+
+        if DEBUG then
+            debugData = {}
+            local index = 1
+            for _, v in pairs(pinnedData) do
+                debugData[index] = v.pinNumber .. " " .. v.prettyDir
+                index = index + 1
+            end
         end
         linesToDir = {}
         render(data, pinnedData, linesToDir, buf)
