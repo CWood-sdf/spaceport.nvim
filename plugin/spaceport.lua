@@ -269,7 +269,9 @@ local function remap()
         rawData = {}
         refreshLocals()
         render()
-    end)
+    end, {
+        buffer = buf,
+    })
     vim.keymap.set("n", "J", function()
         local line = vim.fn.line('.')
         local count = linesToDir[line]
@@ -309,7 +311,9 @@ local function remap()
         end)
         writeData(rawData)
         render()
-    end)
+    end, {
+        buffer = buf,
+    })
     vim.keymap.set("n", "K", function()
         local line = vim.fn.line('.')
         local count = linesToDir[line]
@@ -349,7 +353,9 @@ local function remap()
         end)
         writeData(rawData)
         render()
-    end)
+    end, {
+        buffer = buf,
+    })
     vim.keymap.set("n", "t", function()
         local count = vim.v.count
         if count == 0 then
