@@ -16,7 +16,7 @@ M.timeStartupEnd = function()
 end
 
 M.getStartupTime = function()
-    return startupTime
+    return startupTime / 1e6
 end
 
 M.setup = function(_opts)
