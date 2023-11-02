@@ -459,6 +459,8 @@ vim.api.nvim_create_user_command("Spaceport", function()
 end, {})
 vim.api.nvim_create_autocmd({ "UiEnter" }, {
     callback = function()
+        require("spaceport").timeStartup()
+
         if vim.fn.argc() == 0 then
             mainRender()
         elseif vim.fn.argc() > 0 then
@@ -487,5 +489,6 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
             end
             writeData(dataToWrite)
         end
+        require("spaceport").timeStartupEnd()
     end
 })
