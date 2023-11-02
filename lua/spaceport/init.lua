@@ -31,7 +31,7 @@ end
 M._fixDir = function(path)
     local ret = M._swapHomeWithTilde(path)
     for _, dir in ipairs(opts.ignoreDirs) do
-        local ok, _ = pcall(ipairs, dir)
+        local ok = type(dir) == "table"
         if ok then
             ret = ret:gsub(dir[1], dir[2])
             return ret

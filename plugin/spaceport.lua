@@ -256,9 +256,13 @@ local function render()
     if buf == nil then
         buf = vim.api.nvim_create_buf(false, true)
     end
-    vim.api.nvim_buf_set_option(buf, "modifiable", true)
+    vim.api.nvim_set_option_value("modifiable", true, {
+        buf = buf,
+    })
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
-    vim.api.nvim_buf_set_option(buf, "modifiable", false)
+    vim.api.nvim_set_option_value("modifiable", true, {
+        buf = buf,
+    })
 end
 
 local function remap()
@@ -433,9 +437,15 @@ local function mainRender()
     if buf == nil or not vim.api.nvim_buf_is_valid(buf) then
         buf = vim.api.nvim_create_buf(false, true)
     end
-    vim.api.nvim_buf_set_option(buf, "buftype", "nofile")
-    vim.api.nvim_buf_set_option(buf, "bufhidden", "wipe")
-    vim.api.nvim_buf_set_option(buf, "swapfile", false)
+    vim.api.nvim_set_option_value("buftype", "nofile", {
+        buf = buf,
+    })
+    vim.api.nvim_set_option_value("bufhidden", "wipe", {
+        buf = buf,
+    })
+    vim.api.nvim_set_option_value("swapfile", false, {
+        buf = buf,
+    })
     -- vim.api.nvim_buf_set_option(buf, "number", false)
     vim.api.nvim_set_current_buf(buf)
     vim.cmd("setlocal norelativenumber nonumber")
