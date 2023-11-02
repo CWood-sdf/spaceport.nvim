@@ -4,6 +4,21 @@ local opts = {
     ignoreDirs = {},
     replaceHome = true,
 }
+local startupStart = 0
+local startupTime = 0
+
+M.timeStartup = function()
+    startupStart = vim.loop.hrtime()
+end
+
+M.timeStartupEnd = function()
+    startupTime = vim.loop.hrtime() - startupStart
+end
+
+M.getStartupTime = function()
+    return startupTime
+end
+
 M.setup = function(_opts)
     for k, v in pairs(_opts) do
         if not opts[k] then
