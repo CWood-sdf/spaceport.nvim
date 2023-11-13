@@ -20,7 +20,9 @@ M.getStartupTime = function()
 	return startupTime / 1e6
 end
 
+local hasInit = false
 M.setup = function(_opts)
+	hasInit = true
 	for k, v in pairs(_opts) do
 		if not opts[k] then
 			error("Invalid option for spaceport config: " .. k)
@@ -29,6 +31,9 @@ M.setup = function(_opts)
 	end
 end
 
+M._getHasInit = function()
+	return hasInit
+end
 M._getIgnoreDirs = function()
 	return opts.ignoreDirs
 end

@@ -495,7 +495,11 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
 				end
 			end
 			writeData(dataToWrite)
-			vim.cmd(spaceport._projectEntryCommand())
+			vim.fn.timer_start(100, function()
+				if spaceport._projectEntryCommand() ~= "Ex" then
+					vim.cmd(spaceport._projectEntryCommand())
+				end
+			end)
 		end
 		require("spaceport").timeStartupEnd()
 	end,
