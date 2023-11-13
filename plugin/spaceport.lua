@@ -495,6 +495,7 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
 				end
 			end
 			writeData(dataToWrite)
+			vim.cmd(spaceport._projectEntryCommand())
 		end
 		require("spaceport").timeStartupEnd()
 	end,
