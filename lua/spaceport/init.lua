@@ -49,12 +49,14 @@ M._swapHomeWithTilde = function(path)
 end
 
 M._fixDir = function(path)
+	---@type string
 	local ret = M._swapHomeWithTilde(path)
-	for _, dir in ipairs(opts.ignoreDirs) do
+	for _, dir in pairs(opts.ignoreDirs) do
 		local ok = type(dir) == "table"
 		if ok then
+			-- print(vim.inspect(d))
 			ret = ret:gsub(dir[1], dir[2])
-			return ret
+			-- return ret
 		else
 			ret = ret:gsub(dir, "")
 		end
