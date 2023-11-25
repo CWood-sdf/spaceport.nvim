@@ -4,10 +4,12 @@ local M = {}
 ---@field ignoreDirs? string[]
 ---@field replaceHome? boolean
 ---@field projectEntry? string | fun()
+---@field sections? (string | fun())[]
 local opts = {
 	ignoreDirs = {},
 	replaceHome = true,
 	projectEntry = "Ex",
+	sections = {},
 }
 local startupStart = 0
 local startupTime = 0
