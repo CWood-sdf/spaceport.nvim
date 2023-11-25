@@ -1,5 +1,9 @@
 local M = {}
 
+---@class (exact) SpaceportConfig
+---@field ignoreDirs? string[]
+---@field replaceHome? boolean
+---@field projectEntry? string | fun()
 local opts = {
 	ignoreDirs = {},
 	replaceHome = true,
@@ -8,20 +12,21 @@ local opts = {
 local startupStart = 0
 local startupTime = 0
 
-M.timeStartup = function()
+function M.timeStartup()
 	startupStart = vim.loop.hrtime()
 end
 
-M.timeStartupEnd = function()
+function M.timeStartupEnd()
 	startupTime = vim.loop.hrtime() - startupStart
 end
 
-M.getStartupTime = function()
+function M.getStartupTime()
 	return startupTime / 1e6
 end
 
 local hasInit = false
-M.setup = function(_opts)
+---@param _opts SpaceportConfig
+function M.setup(_opts)
 	hasInit = true
 	for k, v in pairs(_opts) do
 		if not opts[k] then
@@ -31,14 +36,14 @@ M.setup = function(_opts)
 	end
 end
 
-M._getHasInit = function()
+function M._getHasInit()
 	return hasInit
 end
-M._getIgnoreDirs = function()
+function M._getIgnoreDirs()
 	return opts.ignoreDirs
 end
 
-M._swapHomeWithTilde = function(path)
+function M._swapHomeWithTilde(path)
 	if opts.replaceHome then
 		if jit.os == "Windows" then
 			return path:gsub(os.getenv("USERPROFILE"), "~")
@@ -48,7 +53,7 @@ M._swapHomeWithTilde = function(path)
 	return path
 end
 
-M._fixDir = function(path)
+function M._fixDir(path)
 	---@type string
 	local ret = M._swapHomeWithTilde(path)
 	for _, dir in pairs(opts.ignoreDirs) do
@@ -64,8 +69,12 @@ M._fixDir = function(path)
 	return ret
 end
 
-M._projectEntryCommand = function()
-	return opts.projectEntry
+function M._projectEntryCommand()
+	if type(opts.projectEntry) == "string" then
+		vim.cmd(opts.projectEntry)
+	elseif type(opts.projectEntry) == "function" then
+		opts.projectEntry()
+	end
 end
 
 return M

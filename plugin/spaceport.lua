@@ -155,9 +155,15 @@ local function cd(count)
 	if dir == nil then
 		return
 	end
+	vim.api.nvim_exec_autocmds("User SpaceportDone", {
+		data = {
+			isDir = dir.isDir,
+			path = dir.dir,
+		},
+	})
 	if dir.isDir then
 		vim.cmd("cd " .. dir.dir)
-		vim.cmd(spaceport._projectEntryCommand())
+		spaceport._projectEntryCommand()
 	else
 		vim.cmd("edit " .. dir.dir)
 	end
@@ -493,6 +499,16 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
 					dataToWrite[v].time = time
 					dataToWrite[v].isDir = isDir
 				end
+				if not isDir then
+					spaceport._projectEntryCommand()
+				end
+				vim.api.nvim_exec_autocmds("User SpaceportDone", {
+					data = {
+						isDir = isDir,
+						path = v,
+					},
+				})
+				break
 			end
 			writeData(dataToWrite)
 		end
