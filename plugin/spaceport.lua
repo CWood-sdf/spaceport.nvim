@@ -123,13 +123,6 @@ local function isPastMonth(time)
 	return time > getSeconds() - 30 * 24 * 60 * 60
 end
 
--- stylua: ignore
-local topSection =
-       "### ###  #  ### ### ### ### ###  ###\n"
-	.. "#   # # # # #   #   # # # # #  #  # \n"
-	.. "### ### ### #   ##  ### # # ###   # \n"
-	.. "  # #   # # #   #   #   # # #  #  # \n"
-	.. "### #   # # ### ### #   ### #  #  # \n"
 local function addLine(lines, line, width)
 	local padding = math.floor((width - #line) / 2)
 	local paddingStr = string.rep(" ", padding)
@@ -165,6 +158,13 @@ local function cd(count)
 	writeData(rawData)
 end
 
+local topSection = {
+	"### ###  #  ### ### ### ### ###  ###",
+	"#   # # # # #   #   # # # # #  #  # ",
+	"### ### ### #   ##  ### # # ###   # ",
+	"  # #   # # #   #   #   # # #  #  # ",
+	"### #   # # ### ### #   ### #  #  # ",
+}
 local function render()
 	local lines = {}
 	-- vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "Yo sdf", "" })
@@ -508,5 +508,10 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
 			writeData(dataToWrite)
 		end
 		require("spaceport").timeStartupEnd()
+	end,
+})
+vim.api.nvim_create_autocmd({ "VimResized" }, {
+	callback = function()
+		render()
 	end,
 })
