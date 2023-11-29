@@ -1,13 +1,17 @@
+---@type (string|SpaceportWord[])[]
 local topSection = {
-	"### ###  #  ### ### ### ### ###  ###",
+	{ { "### ###  #  ### ### ### ### ###  ###" } },
 	"#   # # # # #   #   # # # # #  #  # ",
 	"### ### ### #   ##  ### # # ###   # ",
 	"  # #   # # #   #   #   # # #  #  # ",
 	"### #   # # ### ### #   ### #  #  # ",
 }
-return {
+---@type SpaceportScreen
+local r = {
 	lines = topSection,
 	remaps = {},
 	title = nil,
 	topBuffer = 1,
 }
+
+return r

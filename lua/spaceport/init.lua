@@ -1,16 +1,23 @@
 local M = {}
+require("spaceport.screen")
 
 ---@class (exact) SpaceportConfig
----@field ignoreDirs? string[]
----@field replaceHome? boolean
----@field projectEntry? string | fun()
----@field sections? (string | fun())[]
+---@field ignoreDirs (string[] | string)[]
+---@field replaceHome boolean
+---@field projectEntry string | fun()
+---@field sections (string | fun(): SpaceportConfig | SpaceportConfig)[]
 local opts = {
 	ignoreDirs = {},
 	replaceHome = true,
 	projectEntry = "Ex",
-	sections = {},
+	sections = {
+		"name",
+		"remaps",
+		-- "tagged",
+		"recents",
+	},
 }
+
 local startupStart = 0
 local startupTime = 0
 
@@ -69,6 +76,10 @@ function M._fixDir(path)
 		end
 	end
 	return ret
+end
+
+function M._getSections()
+	return opts.sections
 end
 
 function M._projectEntryCommand()
