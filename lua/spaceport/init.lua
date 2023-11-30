@@ -1,14 +1,25 @@
 local M = {}
+require("spaceport.screen")
 
 ---@class (exact) SpaceportConfig
----@field ignoreDirs? string[]
----@field replaceHome? boolean
----@field projectEntry? string | fun()
+---@field ignoreDirs (string[] | string)[]
+---@field replaceHome boolean
+---@field projectEntry string | fun()
+---@field sections (string | fun(): SpaceportConfig | SpaceportConfig)[]
+---@field maxRecentFiles number
 local opts = {
 	ignoreDirs = {},
 	replaceHome = true,
 	projectEntry = "Ex",
+	sections = {
+		"name",
+		"remaps",
+		"recents",
+		"_global_remaps",
+	},
+	maxRecentFiles = 0,
 }
+
 local startupStart = 0
 local startupTime = 0
 
@@ -36,6 +47,9 @@ function M.setup(_opts)
 	end
 end
 
+function M._getMaxRecentFiles()
+	return opts.maxRecentFiles
+end
 function M._getHasInit()
 	return hasInit
 end
@@ -67,6 +81,10 @@ function M._fixDir(path)
 		end
 	end
 	return ret
+end
+
+function M._getSections()
+	return opts.sections
 end
 
 function M._projectEntryCommand()
