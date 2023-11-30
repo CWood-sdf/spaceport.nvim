@@ -6,6 +6,7 @@ require("spaceport.screen")
 ---@field replaceHome boolean
 ---@field projectEntry string | fun()
 ---@field sections (string | fun(): SpaceportConfig | SpaceportConfig)[]
+---@field maxRecentFiles number
 local opts = {
 	ignoreDirs = {},
 	replaceHome = true,
@@ -13,9 +14,10 @@ local opts = {
 	sections = {
 		"name",
 		"remaps",
-		-- "tagged",
 		"recents",
+		"_global_remaps",
 	},
+	maxRecentFiles = 0,
 }
 
 local startupStart = 0
@@ -45,6 +47,9 @@ function M.setup(_opts)
 	end
 end
 
+function M._getMaxRecentFiles()
+	return opts.maxRecentFiles
+end
 function M._getHasInit()
 	return hasInit
 end

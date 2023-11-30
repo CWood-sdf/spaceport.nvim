@@ -248,8 +248,9 @@ function M.remap()
 		end
 		for _, remap in ipairs(v.remaps or {}) do
 			if type(remap.action) == "function" then
+				local startLineCopy = startLine + 10 - 10
 				vim.keymap.set(remap.mode, remap.key, function()
-					remap.action(vim.fn.line(".") or 0, vim.v.count)
+					remap.action((vim.fn.line(".") or 0) - startLineCopy, vim.v.count)
 				end, {
 					silent = true,
 					buffer = true,
