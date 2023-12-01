@@ -54,7 +54,7 @@ function M._getHasInit()
 	return hasInit
 end
 function M._getIgnoreDirs()
-	return opts.ignoreDirs
+	return opts.replaceDirs
 end
 
 function M._swapHomeWithTilde(path)
@@ -70,7 +70,7 @@ end
 function M._fixDir(path)
 	---@type string
 	local ret = M._swapHomeWithTilde(path)
-	for _, dir in pairs(opts.ignoreDirs) do
+	for _, dir in pairs(opts.replaceDirs) do
 		local ok = type(dir) == "table"
 		if ok then
 			-- print(vim.inspect(d))
