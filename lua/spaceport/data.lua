@@ -106,6 +106,20 @@ function M.refreshData()
 end
 function M.getMruData()
 	M.refreshData()
+	local ret = {}
+	if require("spaceport")._getMaxRecentFiles() == 0 then
+		return data
+	end
+	for i = 1, require("spaceport")._getMaxRecentFiles() do
+		if data[i] == nil then
+			break
+		end
+		table.insert(ret, data[i])
+	end
+	return ret
+end
+function M.getAllMruData()
+	M.refreshData()
 	return data
 end
 function M.getPinnedData()

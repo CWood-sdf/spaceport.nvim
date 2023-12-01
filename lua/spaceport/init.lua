@@ -2,13 +2,13 @@ local M = {}
 require("spaceport.screen")
 
 ---@class (exact) SpaceportConfig
----@field ignoreDirs (string[] | string)[]
+---@field replaceDirs (string[] | string)[]
 ---@field replaceHome boolean
 ---@field projectEntry string | fun()
 ---@field sections (string | fun(): SpaceportConfig | SpaceportConfig)[]
 ---@field maxRecentFiles number
 local opts = {
-	ignoreDirs = {},
+	replaceDirs = {},
 	replaceHome = true,
 	projectEntry = "Ex",
 	sections = {
