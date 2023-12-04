@@ -10,10 +10,30 @@
 -- 	remap()
 -- 	render()
 -- end
-vim.api.nvim_create_user_command("Spaceport", function()
-	require("spaceport.screen").render()
-	require("spaceport.screen").remap()
-end, {})
+vim.api.nvim_create_user_command("Spaceport", function(opts)
+	if opts.nargs == 0 then
+		require("spaceport.screen").render()
+		require("spaceport.screen").remap()
+	else
+		local args = opts.fargs
+		local command = args[1]
+		if command == "renameWindow" then
+			local value = args[2]
+			if value == nil then
+				value = vim.fn.getcwd()
+			end
+			require("spaceport.data").renameWindow(value)
+		elseif command == "renameSession" then
+			local value = args[2]
+			if value == nil then
+				value = vim.fn.getcwd()
+			end
+			require("spaceport.data").renameSession(value)
+		else
+			print("Bad command " .. command)
+		end
+	end
+end, { nargs = "*" })
 vim.api.nvim_create_autocmd({ "UiEnter" }, {
 	callback = function()
 		require("spaceport").timeStartup()
@@ -47,13 +67,7 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
 				if not isDir then
 					require("spaceport")._projectEntryCommand()
 				end
-				vim.api.nvim_exec_autocmds("User", {
-					pattern = "SpaceportDone",
-					data = {
-						isDir = isDir,
-						path = v,
-					},
-				})
+				require("spaceport.data").setCurrentDir(v)
 				break
 			end
 			require("spaceport.data").writeData(dataToWrite)

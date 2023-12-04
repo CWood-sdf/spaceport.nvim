@@ -8,12 +8,17 @@ local dataDir = dataPath .. "/spaceport.json"
 ---@field isDir boolean
 ---@field pinNumber number
 ---@field prettyDir string
+---@field tmuxWindowName string|nil
+---@field tmuxSessionName string|nil
+
+---@type SpaceportDir|nil
+local currentDir = nil
 
 ---@type SpaceportDir[]
 local data = {}
 ---@type SpaceportDir[]
 local pinnedData = {}
----@type table<string, {time: number, isDir: boolean, pinNumber: number}>
+---@type table<string, {time: number, isDir: boolean, pinNumber: number, tmuxWindowName: string|nil, tmuxSessionName: string|nil}>
 local rawData = {}
 function M.exists(file)
 	local ok, _, code = os.rename(file, file)
@@ -65,6 +70,23 @@ function M.readData()
 	return ret
 end
 
+---@param dir string
+function M.setCurrentDir(dir)
+	M.refreshData()
+	local d = M.getAllData()
+	for _, v in pairs(d) do
+		if v.dir == dir then
+			currentDir = v
+			return
+		end
+	end
+	M.doTmuxActions()
+	vim.api.nvim_exec_autocmds("User", {
+		pattern = "SpaceportDone",
+		data = currentDir,
+	})
+end
+
 function M.writeData(d)
 	local file = io.open(dataDir, "w")
 	if file == nil then
@@ -89,6 +111,8 @@ function M.refreshData()
 			isDir = v.isDir,
 			pinNumber = v.pinNumber,
 			prettyDir = spaceport._fixDir(k),
+			tmuxWindowName = v.tmuxWindowName,
+			tmuxSessionName = v.tmuxSessionName,
 		}
 		if v.pinNumber == 0 then
 			table.insert(data, insert)
@@ -104,6 +128,23 @@ function M.refreshData()
 		return a.pinNumber < b.pinNumber
 	end)
 end
+
+---@return SpaceportDir[]
+function M.getAllData()
+	M.refreshData()
+	local ret = {}
+	for _, v in pairs(data) do
+		table.insert(ret, v)
+	end
+	for _, v in pairs(pinnedData) do
+		table.insert(ret, v)
+	end
+	table.sort(ret, function(a, b)
+		return a.time > b.time
+	end)
+	return ret
+end
+---@return SpaceportDir[]
 function M.getMruData()
 	M.refreshData()
 	local ret = {}
@@ -118,10 +159,12 @@ function M.getMruData()
 	end
 	return ret
 end
+---@return SpaceportDir[]
 function M.getAllMruData()
 	M.refreshData()
 	return data
 end
+---@return SpaceportDir[]
 function M.getPinnedData()
 	M.refreshData()
 	return pinnedData
@@ -131,6 +174,58 @@ function M.getRawData()
 	return rawData
 end
 
+function M.renameSession(str)
+	M.refreshData()
+	if currentDir == nil then
+		print("No spaceport directory selected yet")
+		return
+	end
+	currentDir.tmuxSessionName = str
+	if os.getenv("TMUX") ~= nil then
+		vim.system({ "tmux", "rename-session", currentDir.tmuxSessionName }, { text = true })
+	else
+		print("Not currently in tmux")
+	end
+	rawData[currentDir.dir].tmuxSessionName = currentDir.tmuxSessionName
+end
+
+function M.renameWindow(str)
+	M.refreshData()
+	if currentDir == nil then
+		print("No spaceport directory selected yet")
+		return
+	end
+	currentDir.tmuxWindowName = str
+	if os.getenv("TMUX") ~= nil then
+		vim.system({ "tmux", "rename-window", currentDir.tmuxWindowName }, { text = true })
+	else
+		print("Not currently in tmux")
+	end
+	rawData[currentDir.dir].tmuxWindowName = currentDir.tmuxWindowName
+	M.writeData(rawData)
+end
+
+function M.doTmuxActions()
+	if currentDir == nil then
+		print("No spaceport directory selected yet")
+		return
+	end
+	if currentDir.tmuxSessionName ~= nil then
+		M.renameSession(currentDir.tmuxSessionName)
+	end
+	if currentDir.tmuxWindowName ~= nil then
+		M.renameWindow(currentDir.tmuxWindowName)
+	end
+end
+
+---@param str string
+function M.removeDir(str)
+	local d = M.getRawData()
+	d[str] = nil
+	M.writeData(d)
+end
+
+---@param dir SpaceportDir
 function M.cd(dir)
 	M.refreshData()
 	rawData[dir.dir].time = require("spaceport.utils").getSeconds()
@@ -141,12 +236,12 @@ function M.cd(dir)
 	else
 		vim.cmd("edit " .. dir.dir)
 	end
+
+	currentDir = dir
+	M.doTmuxActions()
 	vim.api.nvim_exec_autocmds("User", {
 		pattern = "SpaceportDone",
-		data = {
-			isDir = dir.isDir,
-			path = dir.dir,
-		},
+		data = currentDir,
 	})
 end
 return M
