@@ -11,8 +11,8 @@
 -- 	render()
 -- end
 vim.api.nvim_create_user_command("Spaceport", function(opts)
-	print(opts.nargs)
-	if opts.nargs == 0 or opts.nargs == nil then
+	-- print(opts.fargs)
+	if #opts.fargs == 0 or opts.fargs == nil then
 		require("spaceport.screen").render()
 		require("spaceport.screen").remap()
 	else
