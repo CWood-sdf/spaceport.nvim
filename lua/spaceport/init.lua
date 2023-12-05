@@ -13,7 +13,7 @@ local opts = {
 	replaceHome = true,
 	projectEntry = "Ex",
 	logPath = vim.fn.stdpath("log") .. "/spaceport.log",
-	logPreserveHrs = 24 * 7,
+	logPreserveHrs = 24,
 	sections = {
 		"name",
 		"remaps",
