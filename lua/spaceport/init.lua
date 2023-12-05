@@ -98,6 +98,7 @@ function M._fixDir(path)
 			ret = ret:gsub(dir[1], dir[2])
 			-- return ret
 		else
+			---@cast dir string
 			ret = ret:gsub(dir, "")
 		end
 	end
