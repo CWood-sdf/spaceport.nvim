@@ -77,7 +77,7 @@ function M.setCurrentDir(dir)
 	for _, v in pairs(d) do
 		if v.dir == dir then
 			currentDir = v
-			return
+			break
 		end
 	end
 	M.doTmuxActions()

@@ -9,8 +9,7 @@ local SpaceportRemap = {}
 --This is supposed to be able to allow highlighting of words
 ---@class (exact) SpaceportWord
 ---@field [1] string
----@field fg string | nil
----@field bg string | nil
+---@field colorOpts table | nil
 
 ---@class (exact) SpaceportScreen
 ---@field lines (string|SpaceportWord[])[] | (fun(): (string|SpaceportWord[])[])
@@ -25,15 +24,19 @@ local buf = nil
 local width = 0
 local hlNs = nil
 local hlId = 0
+local log = require("spaceport").log
 ---@return SpaceportScreen[]
 function M.getActualScreens()
+	log("spaceport.screen.getActualScreens()")
 	local configScreens = require("spaceport")._getSections()
 	---@type SpaceportScreen[]
 	local screens = {}
 	for _, screen in ipairs(configScreens) do
 		if type(screen) == "string" then
+			log("screen: " .. screen)
 			local ok, s = pcall(require, "spaceport.screens." .. screen)
 			if not ok then
+				log("Invalid screen: " .. screen)
 				error("Invalid screen: " .. screen)
 			end
 			screen = s
@@ -208,21 +211,10 @@ function M.render()
 	local col = 0
 	for _, v in ipairs(lines) do
 		for _, word in ipairs(v) do
-			if word.fg ~= nil or word.bg ~= nil then
+			if word.colorOpts ~= nil then
 				local hlGroup = "spaceport_hl_" .. hlId
 				-- print("hlGroup: " .. hlGroup)
-				if word.fg ~= nil and word.fg:sub(1, 1) ~= "#" then
-					-- print(word.fg[1])
-					vim.api.nvim_set_hl(hlNs, hlGroup, {
-						link = word.fg,
-					})
-				else
-					print(word.fg, word.bg)
-					vim.api.nvim_set_hl(hlNs, hlGroup, {
-						foreground = word.fg,
-						bg = "#000000",
-					})
-				end
+				vim.api.nvim_set_hl(hlNs, hlGroup, word.colorOpts)
 				hlId = hlId + 1
 				-- print("highlighting yo")
 				-- print(buf, hlNs, hlGroup, row, col, col + #word[1])

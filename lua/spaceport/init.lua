@@ -1,16 +1,19 @@
 local M = {}
-require("spaceport.screen")
 
 ---@class (exact) SpaceportConfig
 ---@field replaceDirs (string[] | string)[]
 ---@field replaceHome boolean
 ---@field projectEntry string | fun()
 ---@field sections (string | fun(): SpaceportConfig | SpaceportConfig)[]
+---@field logPath string
 ---@field maxRecentFiles number
+---@field logPreserveHrs number
 local opts = {
 	replaceDirs = {},
 	replaceHome = true,
 	projectEntry = "Ex",
+	logPath = vim.fn.stdpath("log") .. "/spaceport.log",
+	logPreserveHrs = 24 * 7,
 	sections = {
 		"name",
 		"remaps",
@@ -41,12 +44,30 @@ function M.setup(_opts)
 	hasInit = true
 	for k, v in pairs(_opts) do
 		if not opts[k] then
-			error("Invalid option for spaceport config: " .. k)
+			print("Invalid option for spaceport config: " .. k)
 		end
 		opts[k] = v
 	end
 end
 
+function M.log(msg)
+	local logFile = vim.fn.fnamemodify(opts.logPath, ":p")
+	if not require("spaceport.data").exists(logFile) then
+		vim.fn.writefile({ "" }, logFile)
+	end
+	local log = vim.fn.readfile(logFile)
+	for i = 1, #log do
+		local num = tonumber(vim.fn.split(log[i], " ")[1])
+		if not num then
+			print("Invalid log entry: " .. log[i])
+			table.remove(log, i)
+		elseif num < vim.fn.localtime() - opts.logPreserveHrs * 60 then
+			table.remove(log, i)
+		end
+	end
+	table.insert(log, vim.fn.localtime() .. " " .. msg)
+	vim.fn.writefile(log, logFile)
+end
 function M._getMaxRecentFiles()
 	return opts.maxRecentFiles
 end

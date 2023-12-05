@@ -53,10 +53,10 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
 					dataToWrite[v].time = time
 					dataToWrite[v].isDir = isDir
 				end
-				if not isDir then
+				require("spaceport.data").setCurrentDir(v)
+				if isDir then
 					require("spaceport")._projectEntryCommand()
 				end
-				require("spaceport.data").setCurrentDir(v)
 				break
 			end
 			require("spaceport.data").writeData(dataToWrite)
