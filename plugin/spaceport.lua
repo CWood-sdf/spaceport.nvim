@@ -1,15 +1,3 @@
--- local spaceport = require("spaceport")
---
--- --
--- local function render() end
--- --
--- local function remap() end
--- --
--- local function mainRender()
---
--- 	remap()
--- 	render()
--- end
 vim.api.nvim_create_user_command("Spaceport", function(opts)
 	-- print(opts.fargs)
 	if #opts.fargs == 0 or opts.fargs == nil then
