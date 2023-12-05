@@ -231,10 +231,39 @@ function M.cd(dir)
 	rawData[dir.dir].time = require("spaceport.utils").getSeconds()
 	M.writeData(rawData)
 	if dir.isDir then
-		vim.cmd("cd " .. dir.dir)
+		local ok, _ = pcall(vim.cmd.cd, dir.dir)
+		if not ok then
+			local answer = vim.fn.input(
+				"It seems like "
+					.. dir.dir
+					.. " does not exist anymore, would you like it to be removed from spaceport? (y/n):"
+			)
+			if answer == "y" then
+				M.removeDir(dir.dir)
+				M.refreshData()
+				require("spaceport.screen").render()
+			end
+			return
+		end
+
 		spaceport._projectEntryCommand()
 	else
-		vim.cmd("edit " .. dir.dir)
+		local ok = M.exists(dir.dir)
+		if not ok then
+			local answer = vim.fn.input(
+				"It seems like "
+					.. dir.dir
+					.. " does not exist anymore, would you like it to be removed from spaceport? (y/n):"
+			)
+			if answer == "y" then
+				M.removeDir(dir.dir)
+				M.refreshData()
+				require("spaceport.screen").render()
+			end
+			return
+		else
+			vim.cmd("edit " .. dir.dir)
+		end
 	end
 
 	currentDir = dir
