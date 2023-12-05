@@ -51,6 +51,9 @@ function M.setup(_opts)
 end
 
 function M.log(msg)
+	if msg == nil then
+		return
+	end
 	local logFile = vim.fn.fnamemodify(opts.logPath, ":p")
 	if not require("spaceport.data").exists(logFile) then
 		vim.fn.writefile({ "" }, logFile)
@@ -59,7 +62,6 @@ function M.log(msg)
 	for i = 1, #log do
 		local num = tonumber(vim.fn.split(log[i], " ")[1])
 		if not num then
-			print("Invalid log entry: " .. log[i])
 			table.remove(log, i)
 		elseif num < vim.fn.localtime() - opts.logPreserveHrs * 60 then
 			table.remove(log, i)
