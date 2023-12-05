@@ -48,6 +48,7 @@ function M.setup(_opts)
 		end
 		opts[k] = v
 	end
+	require("spaceport.setup_auto")
 end
 
 function M.log(msg)
