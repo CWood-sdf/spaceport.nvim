@@ -25,6 +25,9 @@ local width = 0
 local hlNs = nil
 local hlId = 0
 local log = require("spaceport").log
+function M.isRendering()
+	return buf ~= nil and vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_get_current_buf() == buf
+end
 ---@return SpaceportScreen[]
 function M.getActualScreens()
 	log("spaceport.screen.getActualScreens()")

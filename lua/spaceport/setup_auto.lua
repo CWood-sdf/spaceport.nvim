@@ -66,6 +66,8 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
 })
 vim.api.nvim_create_autocmd({ "VimResized" }, {
 	callback = function()
-		require("spaceport.screen").render()
+		if require("spaceport.screen").isRendering() then
+			require("spaceport.screen").render()
+		end
 	end,
 })
