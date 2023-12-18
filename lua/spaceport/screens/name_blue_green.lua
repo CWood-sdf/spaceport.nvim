@@ -6,6 +6,7 @@ local topSection = {
 	"  # #   # # #   #   #   # # #  #  # ",
 	"### #   # # ### ### #   ### #  #  # ",
 }
+
 local getLines = function()
 	local ret = {}
 	local base = 100

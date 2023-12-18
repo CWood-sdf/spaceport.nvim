@@ -12,7 +12,7 @@ local SpaceportRemap = {}
 ---@field colorOpts table | nil
 
 ---@class (exact) SpaceportScreen
----@field lines (string|SpaceportWord[])[] | (fun(): (string|SpaceportWord[])[])
+---@field lines (string|SpaceportWord[])[] | (fun(): (string|SpaceportWord[])[]) | (fun(): string[]) | (fun(): SpaceportWord[][])
 ---@field remaps SpaceportRemap[] | nil
 ---@field title string | nil | fun(): string
 ---@field topBuffer number
