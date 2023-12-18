@@ -38,6 +38,7 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
 			if type(argv) == "string" then
 				argv = { argv }
 			end
+			local dir = nil
 			for _, v in pairs(argv) do
 				local isDir = require("spaceport.data").isdir(v)
 				if not require("spaceport.data").isdir(v) then
@@ -53,13 +54,14 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
 					dataToWrite[v].time = time
 					dataToWrite[v].isDir = isDir
 				end
-				require("spaceport.data").setCurrentDir(v)
 				if isDir then
 					require("spaceport")._projectEntryCommand()
 				end
+				dir = v
 				break
 			end
 			require("spaceport.data").writeData(dataToWrite)
+			require("spaceport.data").setCurrentDir(dir)
 		end
 		require("spaceport").timeStartupEnd()
 	end,

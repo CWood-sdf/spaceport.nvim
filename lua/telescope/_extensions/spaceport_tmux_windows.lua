@@ -6,17 +6,22 @@ local action_state = require("telescope.actions.state")
 
 return function(opts)
 	opts = opts or require("telescope.themes").get_dropdown({})
+	local data = require("spaceport.data").getAllData()
+	data = vim.tbl_filter(function(v)
+		---@cast v SpaceportDir
+		return v.tmuxWindowName ~= nil
+	end, data)
 	pickers
 		.new(opts, {
-			prompt_title = "Spaceport Projects",
+			prompt_title = "Spaceport Tmux Windows",
 			finder = finders.new_table({
 				results = require("spaceport.data").getAllData(),
 
 				entry_maker = function(entry)
 					return {
 						value = entry,
-						display = entry.prettyDir,
-						ordinal = entry.prettyDir,
+						display = entry.tmuxWindowName,
+						ordinal = entry.tmuxWindowName,
 					}
 				end,
 			}),
