@@ -221,6 +221,14 @@ end
 ---@param str string
 function M.removeDir(str)
 	local d = M.getRawData()
+	if d[str].pinNumber ~= 0 then
+		local pin = d[str].pinNumber
+		for _, v in pairs(d) do
+			if v.pinNumber > pin then
+				v.pinNumber = v.pinNumber - 1
+			end
+		end
+	end
 	d[str] = nil
 	M.writeData(d)
 end

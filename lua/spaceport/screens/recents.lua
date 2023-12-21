@@ -106,6 +106,30 @@ local r = {
 			mode = "n",
 		},
 		{
+			key = "dd",
+			description = "Delete project",
+			action = function(line, count)
+				if count == 0 then
+					count = linesToDir[line]
+				end
+				if count ~= 0 then
+					local data = require("spaceport.data").getRawData()
+					if count <= #pinned then
+						local d = pinned[count].dir
+						require("spaceport.data").removeDir(d)
+						require("spaceport.screen").render()
+					else
+						local d = mru[count - #pinned].dir
+						require("spaceport.data").removeDir(d)
+						require("spaceport.screen").render()
+					end
+				else
+					print("Not hovering over a project")
+				end
+			end,
+			mode = "n",
+		},
+		{
 			key = "t",
 			description = "Toggle project tag",
 			action = function(line, count)
