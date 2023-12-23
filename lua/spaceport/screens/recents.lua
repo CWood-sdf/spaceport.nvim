@@ -5,6 +5,7 @@ local pinned
 local function l()
 	mru = require("spaceport.data").getMruData()
 	pinned = require("spaceport.data").getPinnedData()
+	local lastView = require("spaceport").getConfig().lastViewTime
 	local lines = {}
 	local i = 1
 	local largestLen = 0
@@ -32,6 +33,9 @@ local function l()
 			i = i + 1
 		end
 	end
+	if lastView == "pin" then
+		return lines
+	end
 	local currentTime = ""
 	local utils = require("spaceport.utils")
 	for _, v in pairs(mru) do
@@ -45,24 +49,41 @@ local function l()
 		elseif utils.isYesterday(v.time) then
 			if currentTime ~= "Yesterday" then
 				currentTime = "Yesterday"
+				if lastView == "today" then
+					return lines
+				end
 				lines[#lines + 1] = ""
 				lines[#lines + 1] = currentTime
 			end
 		elseif utils.isPastWeek(v.time) then
 			if currentTime ~= "Past Week" then
 				currentTime = "Past Week"
+				if lastView == "today" or lastView == "yesterday" then
+					return lines
+				end
 				lines[#lines + 1] = ""
 				lines[#lines + 1] = currentTime
 			end
 		elseif utils.isPastMonth(v.time) then
 			if currentTime ~= "Past Month" then
 				currentTime = "Past Month"
+				if lastView == "today" or lastView == "yesterday" or lastView == "pastWeek" then
+					return lines
+				end
 				lines[#lines + 1] = ""
 				lines[#lines + 1] = currentTime
 			end
 		else
 			if currentTime ~= "A long time ago" then
 				currentTime = "A long time ago"
+				if
+					lastView == "today"
+					or lastView == "yesterday"
+					or lastView == "pastWeek"
+					or lastView == "pastMonth"
+				then
+					return lines
+				end
 				lines[#lines + 1] = ""
 				lines[#lines + 1] = currentTime
 			end
@@ -74,7 +95,6 @@ local function l()
 		table.insert(lines, line)
 		i = i + 1
 	end
-
 	return lines
 end
 

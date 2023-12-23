@@ -8,7 +8,9 @@ local M = {}
 ---@field logPath string
 ---@field maxRecentFiles number
 ---@field logPreserveHrs number
+---@field lastViewTime "pin"|"today"|"yesterday"|"pastWeek"|"pastMonth"|"later"
 local opts = {
+	lastViewTime = "later",
 	replaceDirs = {},
 	replaceHome = true,
 	projectEntry = "Ex",
@@ -118,6 +120,9 @@ function M._projectEntryCommand()
 	elseif type(opts.projectEntry) == "function" then
 		opts.projectEntry()
 	end
+end
+function M.getConfig()
+	return opts
 end
 
 return M

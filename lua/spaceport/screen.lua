@@ -3,7 +3,8 @@
 ---@field mode string | string[]
 ---@field action string | fun(line: number, count: number)
 ---@field description string
----@field allowOutsideBuffer boolean | nil
+---@field visible boolean|nil
+---@field callOutside boolean | nil
 local SpaceportRemap = {}
 
 --This is supposed to be able to allow highlighting of words
@@ -243,9 +244,17 @@ function M.remap()
 		end
 		for _, remap in ipairs(v.remaps or {}) do
 			if type(remap.action) == "function" then
-				local startLineCopy = startLine + 10 - 10
+				local startLineCopy = startLine - v.topBuffer - (v.title ~= nil and 1 or 0) - #lines
 				vim.keymap.set(remap.mode, remap.key, function()
-					remap.action((vim.fn.line(".") or 0) - startLineCopy, vim.v.count)
+					local line = (vim.fn.line(".") or 0) - startLineCopy
+					local callOutside = remap.callOutside or true
+					if not callOutside and line > 0 and line <= #lines then
+						remap.action(line, vim.v.count)
+						return
+					end
+					if callOutside then
+						remap.action(line, vim.v.count)
+					end
 				end, {
 					silent = true,
 					buffer = true,
