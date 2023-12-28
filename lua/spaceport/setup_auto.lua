@@ -32,6 +32,7 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
 			require("spaceport.screen").remap()
 		elseif vim.fn.argc() > 0 then
 			-- dir = vim.fn.argv()[1]
+			require("spaceport.data").refreshData()
 			local dataToWrite = require("spaceport.data").readData()
 			local time = require("spaceport.utils").getSeconds()
 			local argv = vim.fn.argv() or {}
@@ -62,6 +63,12 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
 			end
 			require("spaceport.data").writeData(dataToWrite)
 			require("spaceport.data").setCurrentDir(dir)
+			local screens = require("spaceport.screen").getActualScreens()
+			for _, screen in pairs(screens) do
+				if screen.onExit ~= nil then
+					screen.onExit()
+				end
+			end
 		end
 		require("spaceport").timeStartupEnd()
 	end,

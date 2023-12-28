@@ -6,7 +6,7 @@ local function l()
 	for _, section in ipairs(sections) do
 		local remaps = section.remaps or {}
 		for _, remap in ipairs(remaps) do
-			if not remap.allowOutsideBuffer and remap.allowOutsideBuffer ~= nil then
+			if not remap.visible and remap.visible ~= nil then
 				goto continue
 			end
 			local len = #remap.key + #remap.description
@@ -21,7 +21,7 @@ local function l()
 	for _, section in ipairs(sections) do
 		local remaps = section.remaps or {}
 		for _, remap in ipairs(remaps) do
-			if not remap.allowOutsideBuffer and remap.allowOutsideBuffer ~= nil then
+			if not remap.visible and remap.visible ~= nil then
 				goto continue
 			end
 			table.insert(lines, require("spaceport.screen").setWidth({ remap.description, remap.key }, largestLen))

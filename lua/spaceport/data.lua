@@ -72,7 +72,7 @@ end
 
 ---@param dir string
 function M.setCurrentDir(dir)
-	M.refreshData()
+	-- M.refreshData()
 	local d = M.getAllData()
 	for _, v in pairs(d) do
 		if v.dir == dir then
@@ -131,7 +131,7 @@ end
 
 ---@return SpaceportDir[]
 function M.getAllData()
-	M.refreshData()
+	-- M.refreshData()
 	local ret = {}
 	for _, v in pairs(data) do
 		table.insert(ret, v)
@@ -146,7 +146,7 @@ function M.getAllData()
 end
 ---@return SpaceportDir[]
 function M.getMruData()
-	M.refreshData()
+	-- M.refreshData()
 	local ret = {}
 	if require("spaceport")._getMaxRecentFiles() == 0 then
 		return data
@@ -161,16 +161,16 @@ function M.getMruData()
 end
 ---@return SpaceportDir[]
 function M.getAllMruData()
-	M.refreshData()
+	-- M.refreshData()
 	return data
 end
 ---@return SpaceportDir[]
 function M.getPinnedData()
-	M.refreshData()
+	-- M.refreshData()
 	return pinnedData
 end
 function M.getRawData()
-	M.refreshData()
+	-- M.refreshData()
 	return rawData
 end
 
@@ -235,9 +235,10 @@ end
 
 ---@param dir SpaceportDir
 function M.cd(dir)
-	M.refreshData()
+	-- M.refreshData()
 	rawData[dir.dir].time = require("spaceport.utils").getSeconds()
 	M.writeData(rawData)
+	local screens = require("spaceport.screen").getActualScreens()
 	if dir.isDir then
 		local ok, _ = pcall(vim.cmd.cd, dir.dir)
 		if not ok then
@@ -248,12 +249,17 @@ function M.cd(dir)
 			)
 			if answer == "y" then
 				M.removeDir(dir.dir)
-				M.refreshData()
+				-- M.refreshData()
 				require("spaceport.screen").render()
 			end
 			return
 		end
 
+		for _, screen in pairs(screens) do
+			if screen.onExit ~= nil then
+				screen.onExit()
+			end
+		end
 		spaceport._projectEntryCommand()
 	else
 		local ok = M.exists(dir.dir)
@@ -265,11 +271,16 @@ function M.cd(dir)
 			)
 			if answer == "y" then
 				M.removeDir(dir.dir)
-				M.refreshData()
+				-- M.refreshData()
 				require("spaceport.screen").render()
 			end
 			return
 		else
+			for _, screen in pairs(screens) do
+				if screen.onExit ~= nil then
+					screen.onExit()
+				end
+			end
 			vim.cmd("edit " .. dir.dir)
 		end
 	end
