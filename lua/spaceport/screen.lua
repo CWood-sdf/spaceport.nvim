@@ -157,7 +157,7 @@ end
 
 function M.render()
 	require("spaceport.data").refreshData()
-	local startTime = vim.uv.hrtime()
+	local startTime = vim.loop.hrtime()
 	if hlNs ~= nil then
 		vim.api.nvim_buf_clear_namespace(0, hlNs, 0, -1)
 		hlNs = nil
@@ -215,9 +215,9 @@ function M.render()
 		end
 		local screenLines = v.lines
 		if type(screenLines) == "function" then
-			local start = vim.uv.hrtime()
+			local start = vim.loop.hrtime()
 			screenLines = screenLines()
-			totalTime = totalTime + (vim.uv.hrtime() - start) / 1000000
+			totalTime = totalTime + (vim.loop.hrtime() - start) / 1000000
 		end
 		---@cast screenLines (string|SpaceportWord[])[]
 		for _, line in ipairs(screenLines) do
@@ -236,7 +236,7 @@ function M.render()
 		table.insert(actualLines, string.rep(" ", width - 2))
 		table.insert(lines, { { string.rep(" ", width - 2) } })
 	end
-	-- print((vim.uv.hrtime() - startTime) / 1000000 .. "ms")
+	-- print((vim.loop.hrtime() - startTime) / 1000000 .. "ms")
 	-- print("Total time: " .. totalTime .. "ms")
 	for _, v in ipairs(screens) do
 		if v.position == nil then
@@ -364,7 +364,7 @@ function M.render()
 		col = 0
 		row = row + 1
 	end
-	local endTime = vim.uv.hrtime()
+	local endTime = vim.loop.hrtime()
 	-- print("Render time: " .. (endTime - startTime) / 1000000 .. "ms")
 end
 
