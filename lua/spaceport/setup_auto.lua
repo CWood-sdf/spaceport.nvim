@@ -29,7 +29,7 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
 
 		if vim.fn.argc() == 0 then
 			require("spaceport.screen").render()
-			require("spaceport.screen").remap()
+			-- require("spaceport.screen").remap()
 		elseif vim.fn.argc() > 0 then
 			-- dir = vim.fn.argv()[1]
 			require("spaceport.data").refreshData()
