@@ -17,6 +17,10 @@ vim.api.nvim_create_user_command("Spaceport", function(opts)
                 value = vim.fn.getcwd()
             end
             require("spaceport.data").renameSession(value)
+        elseif command == "verticalSplit" then
+            require("spaceport.data").tmuxSplitWindow({})
+        elseif command == "horizontalSplit" then
+            require("spaceport.data").tmuxSplitWindow({ "-h" })
         else
             print("Bad command " .. command)
         end

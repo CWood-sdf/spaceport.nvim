@@ -3,8 +3,8 @@
 ---@field mode string | string[]
 ---@field action string | fun(line: number, count: number)
 ---@field description string
----@field visible boolean|nil
----@field callOutside boolean | nil
+---@field visible? boolean -- Is it visible in the remaps screen?
+---@field callOutside? boolean -- Determines whether this acion can be called with the cursor outside of the viewport
 local SpaceportRemap = {}
 
 --This is supposed to be able to allow highlighting of words
@@ -18,11 +18,11 @@ local SpaceportRemap = {}
 
 ---@class (exact) SpaceportScreen
 ---@field lines (string|SpaceportWord[])[] | (fun(): (string|SpaceportWord[])[]) | (fun(): string[]) | (fun(): SpaceportWord[][])
----@field remaps SpaceportRemap[] | nil
----@field title string | nil | fun(): string
+---@field remaps? SpaceportRemap[]
+---@field title? string | fun(): string
 ---@field topBuffer number
----@field position SpaceportScreenPosition | nil
----@field onExit fun() | nil
+---@field position? SpaceportScreenPosition
+---@field onExit? fun()
 local SpaceportScreen = {}
 
 local M = {}
@@ -347,7 +347,6 @@ function M.render()
     ---@type table<integer, SpaceportViewport>
     local remapsViewport = {}
     require("spaceport.data").refreshData()
-    -- local startTime = vim.loop.hrtime()
     if hlNs ~= nil then
         vim.api.nvim_buf_clear_namespace(0, hlNs, 0, -1)
         hlNs = nil
