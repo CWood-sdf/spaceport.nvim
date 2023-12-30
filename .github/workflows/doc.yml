@@ -16,11 +16,11 @@ jobs:
           version: "Neovim >= 0.8.0"
           demojify: true
           treesitter: true
-          branch: main
-          push_options: -f
       - name: Push changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
+          branch: "main"
+          push_options: "-f"
           commit_message: "chore(build): auto-generate vimdoc"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
