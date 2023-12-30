@@ -16,6 +16,8 @@ jobs:
           version: "Neovim >= 0.8.0"
           demojify: true
           treesitter: true
+          branch: main
+          push_options: -f
       - name: Push changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
