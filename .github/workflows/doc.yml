@@ -6,6 +6,8 @@ on:
 jobs:
   docs:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     if: ${{ github.ref == 'refs/heads/main' }}
     steps:
       - uses: actions/checkout@v3
@@ -20,7 +22,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           branch: "main"
-          push_options: "-f"
+          push_options: "--force"
           commit_message: "chore(build): auto-generate vimdoc"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
