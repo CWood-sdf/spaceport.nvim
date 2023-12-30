@@ -168,14 +168,19 @@ local function setRemaps(viewport)
         for _, remap in ipairs(v.remaps or {}) do
             if type(remap.action) == "function" then
                 local startLineCopy = viewport[i].rowStart
+                local indexCopy = i
                 vim.keymap.set(remap.mode, remap.key, function()
-                    local line = (vim.fn.line(".") or 0) - startLineCopy
-                    local callOutside = remap.callOutside or true
-                    if not callOutside and line > 0 and line <= viewport[i].rowStart - viewport[i].rowEnd then
+                    local line = (vim.fn.line(".") or 0) - startLineCopy - (v.topBuffer or 0) -
+                        (v.title ~= nil and 1 or 0)
+                    local callOutside = remap.callOutside
+                    if callOutside == nil then
+                        callOutside = true
+                    end
+                    -- print("sdfsf: " .. vim.inspect(callOutside))
+                    if not callOutside and line > 0 and line <= viewport[indexCopy].rowEnd - viewport[indexCopy].rowStart + 1 then
                         remap.action(line, vim.v.count)
                         return
-                    end
-                    if callOutside then
+                    elseif callOutside then
                         remap.action(line, vim.v.count)
                     end
                 end, {
@@ -192,193 +197,59 @@ local function setRemaps(viewport)
         -- startLine = startLine + v.topBuffer + (v.title ~= nil and 1 or 0) + #lines
     end
 end
----@class (exact) SpaceportViewport
----@field rowStart number
----@field rowEnd number
----@field colStart number
----@field colEnd number
 
-function M.render()
-    ---@type SpaceportWord[][]
-    local gridLines = {}
-    ---@type table<integer, SpaceportViewport>
-    local remapsViewport = {}
-    require("spaceport.data").refreshData()
-    -- local startTime = vim.loop.hrtime()
-    if hlNs ~= nil then
-        vim.api.nvim_buf_clear_namespace(0, hlNs, 0, -1)
-        hlNs = nil
-    end
-    hlId = 0
-    -- if hlNs == nil then
-    hlNs = vim.api.nvim_create_namespace("Spaceport")
-    vim.api.nvim_win_set_hl_ns(0, hlNs)
-    -- end
-    width = vim.api.nvim_win_get_width(0)
 
-    local screens = M.getActualScreens()
-    if buf == nil or not vim.api.nvim_buf_is_valid(buf) then
-        buf = vim.api.nvim_create_buf(false, true)
-        needsRemap = true
-    end
-    vim.api.nvim_set_option_value("buftype", "nofile", {
-        buf = buf,
-    })
-    vim.api.nvim_set_option_value("bufhidden", "wipe", {
-        buf = buf,
-    })
-    vim.api.nvim_set_option_value("swapfile", false, {
-        buf = buf,
-    })
-    -- vim.api.nvim_buf_set_option(buf, "number", false)
-    vim.api.nvim_set_current_buf(buf)
-    vim.cmd("setlocal norelativenumber nonumber")
-    -- local totalTime = 0
-    for index, v in ipairs(screens) do
-        if v.position ~= nil then
-            goto continue
-        end
-        local startRow = #gridLines
-        --Make startCol max length, bc it will be minimized later
-        local startCol = width
-        local endCol = 0
-        local i = 0
-        while i < v.topBuffer do
-            -- table.insert(actualLines, string.rep(" ", width - 2))
-            -- table.insert(lines, { { string.rep(" ", width - 2) } })
-            local newLine = {}
-            for _ = 1, width - 2 do
-                table.insert(newLine, { " " })
-            end
-            table.insert(gridLines, newLine)
-            i = i + 1
-        end
-        if v.title ~= nil then
-            local newLine = {}
-            for _ = 1, width - 2 do
-                table.insert(newLine, { " " })
-            end
+---@param screen SpaceportScreen
+---@param gridLines SpaceportWord[][]
+---@param centerRow number
+---@return SpaceportWord[][],  SpaceportViewport
+local function renderGrid(screen, gridLines, centerRow)
+    --Make startCol max length, bc it will be minimized later
+    local i = 0
+    ---@type (SpaceportWord[]|string)[]
+    local lines = {}
 
-            ---@type string|fun(): string
-            local title = v.title
-            if type(title) == "function" then
-                title = title()
-            end
-            local centered = M.centerString(title)
-            local extra = string.rep(" ", width - #centered - 2)
-            if #extra < startCol then
-                startCol = #extra
-            end
-            if #extra + #centered > endCol then
-                endCol = #extra + #centered
-            end
-            for q = 1, #centered do
-                newLine[q] = { centered:sub(q, q) }
-            end
-            table.insert(gridLines, newLine)
-            centered = centered .. extra
-            -- table.insert(actualLines, centered)
-            local centeredWords = M.centerWords({ { title } })
-            centeredWords[#centeredWords + 1] = { extra }
-            -- table.insert(lines, centeredWords)
-        end
-        local screenLines = v.lines
-        if type(screenLines) == "function" then
-            -- local start = vim.loop.hrtime()
-            screenLines = screenLines()
-            -- totalTime = totalTime + (vim.loop.hrtime() - start) / 1000000
-        end
-        ---@cast screenLines (string|SpaceportWord[])[]
-        for _, line in ipairs(screenLines) do
-            local newLine = {}
-            for _ = 1, width - 2 do
-                table.insert(newLine, { " " })
-            end
-            -- local centeredString = M.centerString(M.wordArrayToString(line))
-            -- centeredString = centeredString .. string.rep(" ", width - #centeredString - 2)
-            -- table.insert(actualLines, centeredString)
-            local words = M.rowToWordArray(line)
-            words = M.centerWords(words)
-            local extra = string.rep(" ", width - #M.wordArrayToString(words) - 2)
-            if #extra < startCol then
-                startCol = #extra
-            end
-            if #extra + #M.wordArrayToString(words) > endCol then
-                endCol = #extra + #M.wordArrayToString(words)
-            end
-            words[#words + 1] = { extra }
-            local spot = 1
-            for _, w in ipairs(words) do
-                local colorOpts = w.colorOpts
-                for q = 1, #w[1] do
-                    if colorOpts ~= nil then
-                        newLine[spot] = { w[1]:sub(q, q), colorOpts = colorOpts }
-                    else
-                        newLine[spot] = { w[1]:sub(q, q) }
-                    end
-                    spot = spot + 1
-                end
-            end
-            table.insert(gridLines, newLine)
-            -- table.insert(lines, words)
-        end
-        local endRow = #gridLines
-        remapsViewport[index] = {
-            rowStart = startRow,
-            rowEnd = endRow,
-            colStart = startCol,
-            colEnd = endCol,
-        }
-        :: continue ::
+    -- add top buffer
+    local topBuffer = screen.topBuffer or 0
+    while i < topBuffer do
+        table.insert(lines, {})
+        i = i + 1
     end
-    while #gridLines < vim.api.nvim_win_get_height(0) do
-        -- table.insert(actualLines, string.rep(" ", width - 2))
-        local newLine = {}
-        while #newLine < width - 2 do
-            table.insert(newLine, { " " })
+
+    -- render title
+    if screen.title ~= nil then
+        ---@type string|fun(): string
+        local title = screen.title
+        if type(title) == "function" then
+            title = title()
         end
-        table.insert(gridLines, newLine)
+        table.insert(lines, { { title } })
     end
-    -- print((vim.loop.hrtime() - startTime) / 1000000 .. "ms")
-    -- print("Total time: " .. totalTime .. "ms")
-    for index, v in ipairs(screens) do
-        if v.position == nil then
-            goto continue
+
+    --render lines
+    local screenLines = screen.lines
+    if type(screenLines) == "function" then
+        screenLines = screenLines()
+    end
+    for _, line in ipairs(screenLines) do
+        table.insert(lines, line)
+    end
+
+    local maxHeight = #lines
+    local maxWidth = 0
+    for _, l in ipairs(lines) do
+        local len = #M.wordArrayToString(l)
+        if len > maxWidth then
+            maxWidth = len
         end
-        local tempLines = {}
-        if v.title ~= nil then
-            ---@type string|fun(): string
-            local title = v.title
-            if type(title) == "function" then
-                title = title()
-            end
-            local centeredWords = { { title } }
-            table.insert(tempLines, centeredWords)
-        end
-        local screenLines = v.lines
-        if type(screenLines) == "function" then
-            screenLines = screenLines()
-        end
-        ---@cast screenLines (string|SpaceportWord[])[]
-        for _, line in ipairs(screenLines) do
-            -- local centeredString = M.centerString(M.wordArrayToString(line))
-            -- centeredString = centeredString .. string.rep(" ", width - #centeredString - 2)
-            local words = M.rowToWordArray(line)
-            -- words = M.centerWords(words)
-            -- local extra = string.rep(" ", width - #M.wordArrayToString(words) - 2)
-            -- words[#words + 1] = { extra }
-            table.insert(tempLines, words)
-        end
-        local maxWidth = 0
-        for _, l in ipairs(tempLines) do
-            local len = #M.wordArrayToString(l)
-            if len > maxWidth then
-                maxWidth = len
-            end
-        end
-        local maxHeight = #tempLines
-        local row = v.position.row
-        local col = v.position.col
+    end
+    local row = nil
+    local col = nil
+
+    -- just make it so that the row and col arent negative
+    if screen.position ~= nil then
+        row = screen.position.row
+        col = screen.position.col
         if row < 0 then
             row = vim.api.nvim_win_get_height(0) + row - maxHeight + 1
         end
@@ -397,36 +268,118 @@ function M.render()
         if col + maxWidth > vim.api.nvim_win_get_width(0) then
             col = vim.api.nvim_win_get_width(0) - maxWidth
         end
-        local startRow = row
-        local startCol = col
-        local endRow = row + maxHeight - 1
-        local endCol = col + maxWidth - 1
-        local i = 1
-        for r = row, row + maxHeight - 1 do
-            local words = M.rowToWordArray(tempLines[i])
+    else
+        row = centerRow
+    end
 
-            local c = startCol
-            for _, w in ipairs(words) do
-                local colorOpts = w.colorOpts
-                for q = 1, #w[1] do
-                    if colorOpts ~= nil then
-                        gridLines[r + 1][c] = { w[1]:sub(q, q), colorOpts = colorOpts }
-                    else
-                        gridLines[r + 1][c] = { w[1]:sub(q, q) }
-                    end
-                    c = c + 1
-                end
-            end
-            i = i + 1
+    local startRow = row
+    local startCol = col
+    local endCol = 0
+    if col == nil then
+        -- col is nil when position is nil, so we have to get the startCol as half the max width from the center
+        startCol = math.floor((vim.api.nvim_win_get_width(0) - maxWidth) / 2)
+        -- endCol is the last column that is rendered
+        endCol = startCol + maxWidth - 1
+    else
+        endCol = col + maxWidth - 1
+    end
+
+    -- make it so that the gridLines is big enough to fit everything
+    while #gridLines < startRow + maxHeight do
+        local newLine = {}
+        while #newLine < width - 2 do
+            table.insert(newLine, { " " })
         end
-        remapsViewport[index] = {
-            rowStart = startRow,
-            rowEnd = endRow,
-            colStart = startCol,
-            colEnd = endCol,
-        }
+        table.insert(gridLines, newLine)
+    end
 
-        :: continue ::
+    local currentRow = startRow
+    for _, line in ipairs(lines) do
+        local newLine = gridLines[currentRow + 1]
+        local words = M.rowToWordArray(line)
+
+        if screen.position == nil then
+            words = M.centerWords(words)
+        end
+        local spot = 1
+        if screen.position ~= nil then
+            spot = startCol or 1
+        end
+        for _, w in ipairs(words) do
+            local colorOpts = w.colorOpts
+            for q = 1, #w[1] do
+                local char = w[1]:sub(q, q)
+                -- basically don't have the buffer spaces overriding actual text beneath it
+                if (spot < startCol or char == " ") and screen.position == nil then
+                    spot = spot + 1
+                    goto continue
+                end
+                if colorOpts ~= nil then
+                    newLine[spot] = { char, colorOpts = colorOpts }
+                else
+                    newLine[spot] = { char }
+                end
+                spot = spot + 1
+                :: continue ::
+            end
+        end
+        gridLines[currentRow + 1] = newLine
+        currentRow = currentRow + 1
+        -- table.insert(lines, words)
+    end
+    return gridLines, {
+        rowStart = startRow,
+        rowEnd = currentRow - 1,
+        colStart = startCol,
+        colEnd = endCol,
+    }
+end
+
+---@class (exact) SpaceportViewport
+---@field rowStart number
+---@field rowEnd number
+---@field colStart number
+---@field colEnd number
+
+function M.render()
+    ---@type SpaceportWord[][]
+    local gridLines = {}
+    ---@type table<integer, SpaceportViewport>
+    local remapsViewport = {}
+    require("spaceport.data").refreshData()
+    -- local startTime = vim.loop.hrtime()
+    if hlNs ~= nil then
+        vim.api.nvim_buf_clear_namespace(0, hlNs, 0, -1)
+        hlNs = nil
+    end
+    hlId = 0
+    hlNs = vim.api.nvim_create_namespace("Spaceport")
+    vim.api.nvim_win_set_hl_ns(0, hlNs)
+    width = vim.api.nvim_win_get_width(0)
+
+    local screens = M.getActualScreens()
+    if buf == nil or not vim.api.nvim_buf_is_valid(buf) then
+        buf = vim.api.nvim_create_buf(false, true)
+        needsRemap = true
+    end
+    vim.api.nvim_set_option_value("buftype", "nofile", {
+        buf = buf,
+    })
+    vim.api.nvim_set_option_value("bufhidden", "wipe", {
+        buf = buf,
+    })
+    vim.api.nvim_set_option_value("swapfile", false, {
+        buf = buf,
+    })
+    vim.api.nvim_set_current_buf(buf)
+    vim.cmd("setlocal norelativenumber nonumber")
+    -- local totalTime = 0
+    local centerRow = 0
+    for index, v in ipairs(screens) do
+        gridLines, remapsViewport[index] = renderGrid(v, gridLines, centerRow)
+        if v.position == nil then
+            centerRow = remapsViewport[index].rowEnd + 1
+        end
     end
     vim.api.nvim_set_option_value("modifiable", true, {
         buf = buf,
@@ -448,18 +401,15 @@ function M.render()
         for _, word in ipairs(v) do
             if word.colorOpts ~= nil then
                 local hlGroup = ""
-                -- print("hlGroup: " .. hlGroup)
-                if usedHighlights[vim.inspect(word.colorOpts)] ~= nil then
-                    hlGroup = usedHighlights[vim.inspect(word.colorOpts)]
+                local optsStr = vim.inspect(word.colorOpts)
+                if usedHighlights[optsStr] ~= nil then
+                    hlGroup = usedHighlights[optsStr]
                 else
                     hlGroup = "spaceport_hl_" .. hlId
                     vim.api.nvim_set_hl(hlNs, hlGroup, word.colorOpts)
                     hlId = hlId + 1
-                    usedHighlights[vim.inspect(word.colorOpts)] = hlGroup
+                    usedHighlights[optsStr] = hlGroup
                 end
-                -- print("highlighting yo")
-                -- print(buf, hlNs, hlGroup, row, col, col + #word[1])
-                --2 4 1 62 98
                 vim.api.nvim_buf_add_highlight(buf, hlNs, hlGroup, row, col, col + #word[1])
             end
             col = col + #word[1]
@@ -471,8 +421,6 @@ function M.render()
         setRemaps(remapsViewport)
         needsRemap = false
     end
-    -- local endTime = vim.loop.hrtime()
-    -- print("Render time: " .. (endTime - startTime) / 1000000 .. "ms")
 end
 
 return M
