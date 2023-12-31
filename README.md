@@ -76,7 +76,16 @@ Spaceport is completely customizable, anything displayed on the screen can be re
 }
 ```
 
-The other preconfigured sections are `name_blue_green` and `hacker_news`. If you want to have your own section, you can add a table entry to the `sections` array. The table entry should conform to the type `SpaceportScreen` defined in `lua/spaceport/screen.lua`. An example screen could be something like this:
+All the preconfigured sections are:
+
+- `_global_remaps`: This section adds a few remaps that are universally useful, like being able to refresh the screen
+- `name`: This section displays an ascii art "Spaceport" logo
+- `remaps`: This section displays all the remaps that are defined as visible in all the other screens
+- `recents`: This section displays the most recently used projects, as well as the pinned projects
+- `name_blue_green`: This section displays the ascii art logo, but with a blue-green gradient
+- `hacker_news`: This section displays the top 5 stories on hacker news
+
+If you want to have your own section, you can add a table entry to the `sections` array. The table entry should conform to the type `SpaceportScreen` defined in `lua/spaceport/screen.lua`. An example screen could be something like this:
 
 ```lua
 local i = 0
@@ -92,6 +101,7 @@ local i = 0
                 -- Spaceport words are tables with the following fields:
                 -- [1] = the text to display
                 -- colorOpts = the options to pass to `vim.api.nvim_set_hl`
+                -- See [nvim_set_hl docs](https://neovim.io/doc/user/api.html#nvim_set_hl())
                 {
                     i .. "",
                     colorOpts = {
@@ -133,6 +143,8 @@ local i = 0
 }
 ```
 
+Note that not most of these values can be left nil in an actual screen, this is just all filled out to show what the possible values are.
+
 If you have a screen that may be universally useful, open a PR with that code in a file in the `lua/spaceport/screens/` directory, you can see some other files in that directory if you need examples
 
 ## Tmux
@@ -141,7 +153,7 @@ If you're in a tmux window, you can call `:Spaceport renameWindow` to rename the
 
 The same thing can be done for sessions with `:Spaceport renameSession`
 
-If you want to split the tmux window, you can call `:Spaceport verticalSplit` or `:Spaceport horizontalSplit`, and it will split the window vertically and open to the project dir in a new pane.
+If you want to split the tmux window while preserving the directory you're in, you can call `:Spaceport verticalSplit` or `:Spaceport horizontalSplit`, and it will split the window vertically and open to the project dir in a new pane.
 
 ## Telescope integration
 

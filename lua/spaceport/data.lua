@@ -188,7 +188,10 @@ function M.renameSession(str)
     end
     currentDir.tmuxSessionName = str
     if os.getenv("TMUX") ~= nil then
-        vim.system({ "tmux", "rename-session", currentDir.tmuxSessionName }, { text = true })
+        vim.fn.jobstart({ "tmux", "rename-session", currentDir.tmuxSessionName }, {
+            on_exit = function()
+            end,
+        })
     else
         print("Not currently in tmux")
     end
@@ -203,7 +206,11 @@ function M.renameWindow(str)
     end
     currentDir.tmuxWindowName = str
     if os.getenv("TMUX") ~= nil then
-        vim.system({ "tmux", "rename-window", currentDir.tmuxWindowName }, { text = true })
+        vim.fn.jobstart({ "tmux", "rename-window", currentDir.tmuxWindowName }, {
+            on_exit = function()
+            end,
+
+        })
     else
         print("Not currently in tmux")
     end
@@ -221,7 +228,14 @@ function M.tmuxSplitWindow(flags)
         print("Not currently in tmux")
         return
     end
-    vim.system({ "tmux", "split-window", unpack(flags), "-c", currentDir.dir }, { text = true })
+    local flagsString = ""
+    for _, v in pairs(flags) do
+        flagsString = flagsString .. " " .. v
+    end
+    vim.fn.jobstart({ "tmux", "split-window", flagsString, "-c" .. currentDir.dir }, {
+        on_exit = function()
+        end,
+    })
 end
 
 function M.doTmuxActions()
