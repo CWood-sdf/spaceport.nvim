@@ -1,0 +1,213 @@
+*spaceport.txt*        For Neovim >= 0.8.0        Last change: 2024 January 02
+
+==============================================================================
+Table of Contents                                *spaceport-table-of-contents*
+
+1. Spaceport.nvim                                   |spaceport-spaceport.nvim|
+  - Why                                         |spaceport-spaceport.nvim-why|
+  - How                                         |spaceport-spaceport.nvim-how|
+  - Installation                       |spaceport-spaceport.nvim-installation|
+  - Usage                                     |spaceport-spaceport.nvim-usage|
+  - Customization                     |spaceport-spaceport.nvim-customization|
+  - Tmux                                       |spaceport-spaceport.nvim-tmux|
+  - Telescope integration     |spaceport-spaceport.nvim-telescope-integration|
+
+==============================================================================
+1. Spaceport.nvim                                   *spaceport-spaceport.nvim*
+
+The launchpad for neovim.
+
+
+WHY                                             *spaceport-spaceport.nvim-why*
+
+I got really annoyed with the pattern of cd’ing to a project folder then
+doing `nvim .` then starting to program. I wanted to just type `nvim` and then
+a few keystrokes later, be in a project. I wanted something that was kind of
+like harpoon <https://github.com/ThePrimeagen/harpoon>, but for your
+directories, not files.
+
+
+HOW                                             *spaceport-spaceport.nvim-how*
+
+Spaceport automatically keeps track of every file and directory you open neovim
+to. It then uses this information to provide a list of the most recently used
+projects. On top of that, some projects can be tagged so that they always
+appear as a certain number on the list. For example, I have my neovim dotfiles
+as tag 1, so in a new terminal window, I can type `nvim` and then `1p` and
+instantly be at my dotfiles, rather than having to type `cd
+~/.config/nvim<CR>nvim .`.
+
+
+INSTALLATION                           *spaceport-spaceport.nvim-installation*
+
+lazy.nvim ~
+
+>lua
+    {
+        'CWood-sdf/spaceport.nvim',
+        opts = {
+    
+        },
+        lazy = false, -- load spaceport immediately
+    }
+<
+
+The default options are:
+
+>lua
+    {
+    
+        replaceDirs = {},
+    
+        -- turn /home/user/ into ~/ (also works on windows for C:\Users\user\)
+        replaceHome = true,
+    
+        -- What to do when entering a directory, personally I use "Oil ."
+        projectEntry = "Ex",
+    
+        -- The farthest back in time that directories should be shown
+        -- I personally use "yesterday" so that there aren't millions of directories on the screen.
+        -- the possible values are: "pin", "today", "yesterday", "pastWeek", "pastMonth", and "later"
+        lastViewTime = "later",
+    
+        -- The maximum number of files to show in the recents section (0 means show all of them)
+        maxRecentFiles = 0,
+    
+        -- The sections to show on the screen (see `Customization` for more info)
+        sections = {
+            "_global_remaps",
+            "name",
+            "remaps",
+            "recents",
+        },
+    
+    }
+<
+
+
+USAGE                                         *spaceport-spaceport.nvim-usage*
+
+Spaceport automatically loads after neovim has started, there is no need to run
+any commands, but if you want to switch projects, run `:Spaceport` to go back
+to the start screen.
+
+
+CUSTOMIZATION                         *spaceport-spaceport.nvim-customization*
+
+Spaceport is completely customizable, anything displayed on the screen can be
+reconfigured by changing the `sections` option. The default sections are:
+
+>lua
+    {
+        "_global_remaps",
+        "name",
+        "remaps",
+        "recents",
+    }
+<
+
+The other preconfigured sections are `name_blue_green` and `hacker_news`. If
+you want to have your own section, you can add a table entry to the `sections`
+array. The table entry should conform to the type `SpaceportScreen` defined in
+`lua/spaceport/screen.lua`. An example screen could be something like this:
+
+>lua
+    local i = 0
+    {
+        title = "count",
+        lines = function()
+            return {
+                -- lines can be strings
+                "Count: ",
+                -- or lines can be arrays of `SpaceportWord`s, this allows the words to have highlights
+                {
+    
+                    -- Spaceport words are tables with the following fields:
+                    -- [1] = the text to display
+                    -- colorOpts = the options to pass to `vim.api.nvim_set_hl`
+                    {
+                        i .. "",
+                        colorOpts = {
+                            fg = "red",
+                        },
+                    },
+                },
+            }
+        end,
+        -- The number of empty lines to put between this section and the next
+        topBuffer = 0,
+        remaps = {
+            {
+                key = "w",
+                mode = "n",
+                action = function()
+                    i = i + 1
+                    -- This will cause the screen to be re-rendered
+                    require('spaceport.screen').render()
+                end,
+                description = "Increment count",
+                -- Setting this to false will make the remap not be shown in the 'remaps' section
+                visible = true,
+                -- Setting this to false will make it so that the action will only be called when the cursor is on the lines of the screen
+                callOutside = true,
+            },
+        },
+        -- if this is null, the screen will be centered
+        position = {
+            -- Positive values are from the top, negative values are from the bottom
+            row = -1,
+            -- Positive values are from the left, negative values are from the right
+            col = 1,
+        },
+        onExit = function()
+            -- This function will be called when spaceport is exited
+            i = 0
+        end,
+    }
+<
+
+If you have a screen that may be universally useful, open a PR with that code
+in a file in the `lua/spaceport/screens/` directory, you can see some other
+files in that directory if you need examples
+
+
+TMUX                                           *spaceport-spaceport.nvim-tmux*
+
+If you’re in a tmux window, you can call `:Spaceport renameWindow` to rename
+the window, furthermore this information is saved so that whenever you reopen
+that directory, the tmux window name will be changed.
+
+The same thing can be done for sessions with `:Spaceport renameSession`
+
+If you want to split the tmux window, you can call `:Spaceport verticalSplit`
+or `:Spaceport horizontalSplit`, and it will split the window vertically and
+open to the project dir in a new pane.
+
+
+TELESCOPE INTEGRATION         *spaceport-spaceport.nvim-telescope-integration*
+
+Spaceport integrates with telescope so that you can fuzzy find projects to
+open. To use this, you need to have telescope installed, and then you can add
+this to your config:
+
+>lua
+    require('telescope').load_extension('spaceport')
+<
+
+Then you can use the `projects` picker:
+
+>lua
+    require('telescope').extensions.spaceport.projects()
+<
+
+Or you can search for a specific tmux window or session name:
+
+>lua
+    require('telecope').extensions.spaceport.tmux_windows()
+    
+    require('telecope').extensions.spaceport.tmux_sessions()
+<
+
+Generated by panvimdoc <https://github.com/kdheepak/panvimdoc>
+
+vim:tw=78:ts=8:noet:ft=help:norl:
