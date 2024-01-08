@@ -2,15 +2,31 @@ local topStories = {}
 local hasDone = false
 vim.fn.jobstart("curl https://hacker-news.firebaseio.com/v0/topstories.json -s", {
     on_exit = function(_, _) end,
-    on_stdout = function(_, data, _)
-        data = vim.fn.json_decode(data)
+    on_stdout = function(_, data, e)
+        if e ~= "stdout" then
+            return
+        end
+        if data[1] == "" then
+            return
+        end
+        -- -- print(vim.inspect(data))
+        -- local o, f = pcall(vim.json.decode, data[1])
+        -- if not o then
+        --     print(data[1])
+        --     return
+        -- end
+        data = vim.json.decode(data[1])
+        -- print(data)
         for i = 1, 5 do
             topStories[i] = { title = "Loading..." }
             local iCopy = i + 1 - 1
             vim.fn.jobstart("curl https://hacker-news.firebaseio.com/v0/item/" .. data[i] .. ".json -s", {
                 on_exit = function(_, _) end,
                 on_stdout = function(_, d, _)
-                    local item = vim.fn.json_decode(d)
+                    if d[1] == "" then
+                        return
+                    end
+                    local item = vim.json.decode(d[1])
                     topStories[iCopy] = item
                     -- vim.fn.timer_start(10, function()
                     -- 	print(#topStories)

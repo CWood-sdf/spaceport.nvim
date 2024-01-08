@@ -218,8 +218,7 @@ function M.renameWindow(str)
     M.writeData(rawData)
 end
 
-function M.tmuxSplitWindow(flags)
-    flags = flags or {}
+function M.tmuxSplitWindowDown()
     if currentDir == nil then
         print("No spaceport directory selected yet")
         return
@@ -228,11 +227,22 @@ function M.tmuxSplitWindow(flags)
         print("Not currently in tmux")
         return
     end
-    local flagsString = ""
-    for _, v in pairs(flags) do
-        flagsString = flagsString .. " " .. v
+    vim.fn.jobstart({ "tmux", "split-window", "-c" .. currentDir.dir }, {
+        on_exit = function()
+        end,
+    })
+end
+
+function M.tmuxSplitWindowLeft()
+    if currentDir == nil then
+        print("No spaceport directory selected yet")
+        return
     end
-    vim.fn.jobstart({ "tmux", "split-window", flagsString, "-c" .. currentDir.dir }, {
+    if os.getenv("TMUX") == nil then
+        print("Not currently in tmux")
+        return
+    end
+    vim.fn.jobstart({ "tmux", "split-window", "-h", "-c" .. currentDir.dir }, {
         on_exit = function()
         end,
     })

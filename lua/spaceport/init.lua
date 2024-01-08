@@ -88,10 +88,26 @@ end
 
 function M._swapHomeWithTilde(path)
     if opts.replaceHome then
+        -- print(os.getenv("HOME"), opts.replaceHome, path, jit.os)
         if jit.os == "Windows" then
             return path:gsub(os.getenv("USERPROFILE"), "~")
         end
-        return path:gsub(os.getenv("HOME"), "~")
+        local home = os.getenv("HOME")
+        local pathCopy = path .. ""
+        local shouldSwap = true
+        for i = 1, #home do
+            if i > #pathCopy then
+                break
+            end
+            if pathCopy:sub(i, i) ~= home:sub(i, i) then
+                shouldSwap = false
+                break
+            end
+        end
+        if shouldSwap then
+            return "~" .. pathCopy:sub(#home + 1)
+        end
+        return path
     end
     return path
 end
