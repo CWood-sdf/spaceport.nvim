@@ -36,6 +36,31 @@ function M.isRendering()
     return buf ~= nil and vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_get_current_buf() == buf
 end
 
+---@param str string
+---@return number
+local function utf8Len(str)
+    local len = 0
+    local i = 1
+    while i <= #str do
+        local c = str:sub(i, i)
+        local inc = 1
+        len = len + 1
+        if c:byte() < 128 then
+            inc = 1
+        elseif c:byte() < 224 then
+            inc = 2
+        elseif c:byte() < 240 then
+            inc = 3
+        else
+            inc = 4
+        end
+        i = i + inc
+    end
+    return len
+end
+local str = "How We Handle Cap Table Information – Henry Ward"
+print(utf8Len(str))
+print(utf8Len("Show HN: I made a HTMX Playground 100% in the browser"))
 ---@return SpaceportScreen[]
 function M.getActualScreens()
     log("spaceport.screen.getActualScreens()")
@@ -62,7 +87,7 @@ end
 ---@param w? number
 function M.centerString(str, w)
     w = w or width
-    local len = #str
+    local len = utf8Len(str)
     local pad = math.floor((w - len) / 2)
     return string.rep(" ", pad) .. str
 end
@@ -74,7 +99,7 @@ function M.centerWords(arr, w)
     w = w or width
     local len = 0
     for _, v in pairs(arr) do
-        len = len + #v[1]
+        len = len + utf8Len(v[1])
     end
     local pad = math.floor((w - len) / 2)
     ---@type SpaceportWord[]
@@ -103,7 +128,7 @@ end
 ---Concats two strings to be a certain width by inserting spaces between them
 function M.setWidth(str, w, ch)
     ch = ch or " "
-    local len = #str[1] + #str[2]
+    local len = utf8Len(str[1]) + utf8Len(str[2])
     local pad = w - len
     local ret = ""
     ret = ret .. str[1] .. string.rep(ch, pad) .. str[2]
@@ -133,8 +158,8 @@ function M.setWidthWords(words, w, ch)
     local ret = {}
     local left = words[1]
     local right = words[2]
-    local leftLen = #left[1]
-    local rightLen = #right[1]
+    local leftLen = utf8Len(left[1])
+    local rightLen = utf8Len(right[1])
     local pad = w - (leftLen + rightLen)
     local spaces = string.rep(ch, pad)
     ret[1] = words[1]
@@ -198,6 +223,18 @@ local function setRemaps(viewport)
     end
 end
 
+local function codepointLen(utf8Char)
+    if utf8Char:byte() < 128 then
+        return 1
+    elseif utf8Char:byte() < 224 then
+        return 2
+    elseif utf8Char:byte() < 240 then
+        return 3
+    else
+        return 4
+    end
+end
+
 
 ---@param screen SpaceportScreen
 ---@param gridLines SpaceportWord[][]
@@ -238,7 +275,7 @@ local function renderGrid(screen, gridLines, centerRow)
     local maxHeight = #lines
     local maxWidth = 0
     for _, l in ipairs(lines) do
-        local len = #M.wordArrayToString(l)
+        local len = utf8Len(M.wordArrayToString(l))
         if len > maxWidth then
             maxWidth = len
         end
@@ -287,7 +324,7 @@ local function renderGrid(screen, gridLines, centerRow)
     -- make it so that the gridLines is big enough to fit everything
     while #gridLines < startRow + maxHeight do
         local newLine = {}
-        while #newLine < width - 2 do
+        while utf8Len(M.wordArrayToString(newLine)) < width - 2 do
             table.insert(newLine, { " " })
         end
         table.insert(gridLines, newLine)
@@ -307,8 +344,11 @@ local function renderGrid(screen, gridLines, centerRow)
         end
         for _, w in ipairs(words) do
             local colorOpts = w.colorOpts
-            for q = 1, #w[1] do
-                local char = w[1]:sub(q, q)
+            local q = 1
+            while q <= #w[1] do
+                local len = codepointLen(w[1]:sub(q, q))
+                local char = w[1]:sub(q, q + len - 1)
+                q = q + len
                 -- basically don't have the buffer spaces overriding actual text beneath it
                 if (spot < startCol or char == " ") and screen.position == nil then
                     spot = spot + 1
