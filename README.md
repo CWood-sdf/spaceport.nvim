@@ -45,7 +45,7 @@ The default options are:
     -- the possible values are: "pin", "today", "yesterday", "pastWeek", "pastMonth", and "later"
     lastViewTime = "later",
 
-    -- The maximum number of files to show in the recents section (0 means show all of them)
+    -- The maximum number of directories to show in the recents section (0 means show all of them)
     maxRecentFiles = 0,
 
     -- The sections to show on the screen (see `Customization` for more info)
