@@ -37,7 +37,7 @@ The default options are:
     -- turn /home/user/ into ~/ (also works on windows for C:\Users\user\)
     replaceHome = true,
 
-    -- What to do when entering a directory, personally I use "Oil ."
+    -- What to do when entering a directory, personally I use "Oil .", but Ex is preinstalled with neovim
     projectEntry = "Ex",
 
     -- The farthest back in time that directories should be shown
@@ -62,6 +62,10 @@ The default options are:
 ## Usage
 
 Spaceport automatically loads after neovim has started, there is no need to run any commands, but if you want to switch projects, run `:Spaceport` to go back to the start screen.
+
+All the remaps are visible at the top of the screen with the default configuration. Any remap that deals with a project can either be used while hovering over the project or by prefixing the command with the project's number.
+
+For example, if I have a project with the number 1, I can type `1p` to open that project, or I can move the cursor to hover over the project and press `p`.
 
 ## Customization
 
