@@ -58,9 +58,6 @@ local function utf8Len(str)
     end
     return len
 end
-local str = "How We Handle Cap Table Information – Henry Ward"
-print(utf8Len(str))
-print(utf8Len("Show HN: I made a HTMX Playground 100% in the browser"))
 ---@return SpaceportScreen[]
 function M.getActualScreens()
     log("spaceport.screen.getActualScreens()")
@@ -382,6 +379,7 @@ end
 ---@field colEnd number
 
 function M.render()
+    local startTime = vim.loop.hrtime()
     ---@type SpaceportWord[][]
     local gridLines = {}
     ---@type table<integer, SpaceportViewport>
@@ -460,6 +458,7 @@ function M.render()
         setRemaps(remapsViewport)
         needsRemap = false
     end
+    -- print("Render time: " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
 end
 
 return M
