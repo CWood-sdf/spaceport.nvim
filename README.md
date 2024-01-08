@@ -167,7 +167,7 @@ Spaceport integrates with telescope so that you can fuzzy find projects to open.
 require('telescope').load_extension('spaceport')
 ```
 
-Then you can use the `projects` picker:
+Then you can use the `projects` picker to select a project by its directory name:
 
 ```lua
 require('telescope').extensions.spaceport.projects()
