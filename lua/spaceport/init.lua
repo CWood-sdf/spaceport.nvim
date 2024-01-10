@@ -27,6 +27,26 @@ local opts = {
     debug = false,
 }
 
+local lastClean = 0
+
+local function cleanLog()
+    local logFile = vim.fn.fnamemodify(opts.logPath, ":p")
+    if not require("spaceport.data").exists(logFile) then
+        vim.fn.writefile({ "" }, logFile)
+    end
+    local log = vim.fn.readfile(logFile)
+    for i = 1, #log do
+        local num = tonumber(vim.fn.split(log[i], " ")[1])
+        if not num then
+            table.remove(log, i)
+        elseif num < vim.fn.localtime() - opts.logPreserveHrs * 60 then
+            table.remove(log, i)
+        end
+    end
+    vim.fn.writefile(log, logFile)
+    lastClean = vim.loop.hrtime()
+end
+
 local startupStart = 0
 local startupTime = 0
 
@@ -53,27 +73,25 @@ function M.setup(_opts)
         opts[k] = v
     end
     require("spaceport.setup_auto")
+    cleanLog()
 end
 
+---@param msg string
 function M.log(msg)
     if msg == nil then
         return
     end
-    local logFile = vim.fn.fnamemodify(opts.logPath, ":p")
-    if not require("spaceport.data").exists(logFile) then
-        vim.fn.writefile({ "" }, logFile)
+    -- Clean every hour
+    if (vim.loop.hrtime() - lastClean) / 1e9 > 60 * 60 then
+        cleanLog()
     end
-    local log = vim.fn.readfile(logFile)
-    for i = 1, #log do
-        local num = tonumber(vim.fn.split(log[i], " ")[1])
-        if not num then
-            table.remove(log, i)
-        elseif num < vim.fn.localtime() - opts.logPreserveHrs * 60 then
-            table.remove(log, i)
-        end
+    local str = vim.fn.strftime("%Y-%m-%d %H:%M:%S") .. " " .. msg
+    local logFile = vim.fn.fnamemodify(opts.logPath, ":p") or ""
+    local file = io.open(logFile, "a")
+    if file == nil then
+        return
     end
-    table.insert(log, vim.fn.localtime() .. " " .. msg)
-    vim.fn.writefile(log, logFile)
+    file:write(str .. "\n")
 end
 
 function M._getMaxRecentFiles()

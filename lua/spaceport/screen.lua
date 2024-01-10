@@ -20,18 +20,59 @@ local SpaceportRemap = {}
 ---@field lines (string|SpaceportWord[])[] | (fun(): (string|SpaceportWord[])[]) | (fun(): string[]) | (fun(): SpaceportWord[][])
 ---@field remaps? SpaceportRemap[]
 ---@field title? string | fun(): string
----@field topBuffer number
+---@field topBuffer? number
 ---@field position? SpaceportScreenPosition
 ---@field onExit? fun()
 local SpaceportScreen = {}
 
 local M = {}
 
+local log = require("spaceport").log
+local function sanitizeRemap(remap)
+    if remap.mode == nil then
+        log("Invalid remap: " .. vim.inspect(remap))
+    elseif remap.key == nil then
+        log("Invalid remap: " .. vim.inspect(remap))
+    elseif remap.action == nil then
+        log("Invalid remap: " .. vim.inspect(remap))
+    elseif remap.description == nil then
+        log("Invalid remap: " .. vim.inspect(remap))
+    else
+        return true
+    end
+    return false
+end
+local function sanitizeScreenPosition(pos)
+    if pos.row == nil then
+        log("Invalid screen position: " .. vim.inspect(pos))
+    elseif pos.col == nil then
+        log("Invalid screen position: " .. vim.inspect(pos))
+    else
+        return true
+    end
+    return false
+end
+local function sanitizeScreen(screen)
+    if screen.lines == nil then
+        log("Invalid screen: " .. vim.inspect(screen))
+    elseif screen.remaps ~= nil then
+        for _, remap in ipairs(screen.remaps) do
+            if not sanitizeRemap(remap) then
+                return false
+            end
+        end
+    elseif screen.position ~= nil then
+        if not sanitizeScreenPosition(screen.position) then
+            return false
+        end
+    end
+    return true
+end
+
 local buf = nil
 local width = 0
 local hlNs = nil
 local hlId = 0
-local log = require("spaceport").log
 function M.isRendering()
     return buf ~= nil and vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_get_current_buf() == buf
 end
@@ -74,7 +115,18 @@ function M.getActualScreens()
             end
             screen = s
         end
-        table.insert(screens, screen)
+        if sanitizeScreen(screen) then
+            table.insert(screens, screen)
+        else
+            table.insert(screens, {
+                lines = {
+                    "Invalid screen",
+                },
+                remaps = {},
+                title = nil,
+                topBuffer = 0,
+            })
+        end
     end
     return screens
 end
