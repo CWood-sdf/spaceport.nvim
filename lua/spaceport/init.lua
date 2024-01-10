@@ -47,7 +47,7 @@ local hasInit = false
 function M.setup(_opts)
     hasInit = true
     for k, v in pairs(_opts) do
-        if not opts[k] then
+        if opts[k] == nil then
             M.log("Invalid option for spaceport config: " .. k)
         end
         opts[k] = v
