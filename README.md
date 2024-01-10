@@ -1,14 +1,18 @@
 # Spaceport.nvim
 
-The launchpad for neovim.
+The blazingly fastest:tm: way to get to your projects
 
 ## Why
 
-I got really annoyed with the pattern of cd'ing to a project folder then doing `nvim .` then starting to program. I wanted to just type `nvim` and then a few keystrokes later, be in a project. I wanted something that was kind of like [harpoon](https://github.com/ThePrimeagen/harpoon), but for your directories, not files.
+I got really annoyed with the pattern of cd'ing to a project folder then doing `nvim .` then starting to program. I wanted to just type `nvim` and then a few keystrokes later, be in a project. I wanted something that was kind of like [harpoon](https://github.com/ThePrimeagen/harpoon), but for directories, not files.
 
 ## How
 
-Spaceport automatically keeps track of every file and directory you open neovim to. It then uses this information to provide a list of the most recently used projects. On top of that, some projects can be tagged so that they always appear as a certain number on the list. For example, I have my neovim dotfiles as tag 1, so in a new terminal window, I can type `nvim` and then `1p` and instantly be at my dotfiles, rather than having to type `cd ~/.config/nvim<CR>nvim .`.
+Spaceport automatically keeps track of every file and directory you open neovim to. It then uses this information to provide a list of the most recently used projects. Then you can navigate to a project by selecting it from the list, as you can see in the video below:
+
+./assets/slow.mp4
+
+On top of that, some projects can be tagged so that they always appear as a certain number on the list. For example, I have my neovim dotfiles as tag 1, so in a new terminal window, I can type `nvim` and then `1p` and instantly be at my dotfiles, rather than having to type `cd ~/.config/nvim<CR>nvim .`. When used properly, bookmarks can make going to a project instantaneous, as you can see in the video below.
 
 ## Installation
 
