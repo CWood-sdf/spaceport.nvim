@@ -1,6 +1,6 @@
 # Spaceport.nvim
 
-The blazingly fastest :tm: way to get to your projects
+The "blazingly fastest" way to get to your projects
 
 ## Why
 
@@ -10,9 +10,9 @@ I got really annoyed with the pattern of cd'ing to a project folder then doing `
 
 Spaceport automatically keeps track of every file and directory you open neovim to. It then uses this information to provide a list of the most recently used projects. Then you can navigate to a project by selecting it from the list
 
-On top of that, some projects can be tagged so that they always appear as a certain number on the list. For example, I have my neovim dotfiles as tag 1, so in a new terminal window, I can type `nvim` and then `1p` and instantly be at my dotfiles, rather than having to type `cd ~/.config/nvim<CR>nvim .`.
+On top of that, some projects can be tagged so that they always appear as a certain number on the list. For example, I have my neovim dotfiles as tag 1, so in a new terminal window, I can type `nvim` and then `1p` and instantly be at my dotfiles, rather than having to type `cd ~/.config/nvim<CR>nvim .`. When I am going to a tagged project, it usually takes <.5s to be in the project.
 
-The tag system is something I've only seen in one other repo: [startup.nvim](https://github.com/startup-nvim/startup.nvim), yet even in startup.nvim the tags have to be manually defined in your config. Furthermore, they are dealt as a seperate system from the recent files (MRUs).
+The tag system is something I've only seen in one other startup plugin: [startup.nvim](https://github.com/startup-nvim/startup.nvim), yet even in startup.nvim the tags have to be manually defined in your config making them really clunky to use.
 
 ## Installation
 
@@ -60,16 +60,21 @@ The default options are:
         "recents",
     },
 
+    --- Set to true to have more verbose logging
+    debug = false,
+
 }
 ```
+
+## Performance
+
+Spaceport is designed to be as fast as possible. The config time measured with lazy.nvim is ~0.2ms with the default configuration. Each render cycle takes only about 20-40ms.
 
 ## Usage
 
 Spaceport automatically loads after neovim has started, there is no need to run any commands, but if you want to switch projects, run `:Spaceport` to go back to the start screen.
 
-All the remaps are visible at the top of the screen with the default configuration. Any remap that deals with a project can either be used while hovering over the project or by prefixing the command with the project's number.
-
-For example, if I have a project with the number 1, I can type `1p` to open that project, or I can move the cursor to hover over the project and press `p`.
+All the remaps are visible at the top of the screen with the default configuration. Any remap that deals with a project can either be used while hovering over the project or by prefixing the command with the project's number. For example, if I have a project with the number 1, I can type `1p` to open that project, or I can move the cursor to hover over the project and press `p`.
 
 ## Customization
 
@@ -119,13 +124,16 @@ local i = 0
             },
         }
     end,
-    -- The number of empty lines to put between this section and the next
+    -- The number of empty lines to put between this section and the previous section
     topBuffer = 0,
     remaps = {
         {
             key = "w",
             mode = "n",
-            action = function()
+            --- Spaceport passes two parameters to action:
+            --- 1. The line that the cursor is on (relative to the start of the screen)
+            --- 2. vim.v.count
+            action = function(line, count)
                 i = i + 1
                 -- This will cause the screen to be re-rendered
                 require('spaceport.screen').render()
@@ -137,7 +145,7 @@ local i = 0
             callOutside = true,
         },
     },
-    -- if this is null, the screen will be centered
+    -- if this is nil, the screen will be centered
     position = {
         -- Positive values are from the top, negative values are from the bottom
         row = -1,
