@@ -60,13 +60,13 @@ local function utf8Len(str)
 end
 ---@return SpaceportScreen[]
 function M.getActualScreens()
-    log("spaceport.screen.getActualScreens()")
+    -- log("spaceport.screen.getActualScreens()")
     local configScreens = require("spaceport")._getSections()
     ---@type SpaceportScreen[]
     local screens = {}
     for _, screen in ipairs(configScreens) do
         if type(screen) == "string" then
-            log("screen: " .. screen)
+            -- log("screen: " .. screen)
             local ok, s = pcall(require, "spaceport.screens." .. screen)
             if not ok then
                 log("Invalid screen: " .. screen)
@@ -181,9 +181,10 @@ end
 local needsRemap = true
 
 ---@param viewport SpaceportViewport[]
-local function setRemaps(viewport)
+---@param screens SpaceportScreen[]
+local function setRemaps(viewport, screens)
     require("spaceport.data").refreshData()
-    local screens = M.getActualScreens()
+    -- local screens = M.getActualScreens()
 
     -- local startLine = 0
     for i, v in ipairs(screens) do
@@ -379,12 +380,18 @@ end
 ---@field colEnd number
 
 function M.render()
+    log("spaceport.screen.render()")
+    local actualStart = vim.loop.hrtime()
     local startTime = vim.loop.hrtime()
     ---@type SpaceportWord[][]
     local gridLines = {}
     ---@type table<integer, SpaceportViewport>
     local remapsViewport = {}
     require("spaceport.data").refreshData()
+    if require('spaceport').getConfig().debug then
+        log("Refresh took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
+        startTime = vim.loop.hrtime()
+    end
     if hlNs ~= nil then
         vim.api.nvim_buf_clear_namespace(0, hlNs, 0, -1)
         hlNs = nil
@@ -393,8 +400,16 @@ function M.render()
     hlNs = vim.api.nvim_create_namespace("Spaceport")
     vim.api.nvim_win_set_hl_ns(0, hlNs)
     width = vim.api.nvim_win_get_width(0)
+    if require('spaceport').getConfig().debug then
+        log("Width took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
+        startTime = vim.loop.hrtime()
+    end
 
     local screens = M.getActualScreens()
+    if require('spaceport').getConfig().debug then
+        log("Screens took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
+        startTime = vim.loop.hrtime()
+    end
     if buf == nil or not vim.api.nvim_buf_is_valid(buf) then
         buf = vim.api.nvim_create_buf(false, true)
         needsRemap = true
@@ -410,6 +425,10 @@ function M.render()
     })
     vim.api.nvim_set_current_buf(buf)
     vim.cmd("setlocal norelativenumber nonumber")
+    if require('spaceport').getConfig().debug then
+        log("Buf took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
+        startTime = vim.loop.hrtime()
+    end
     -- local totalTime = 0
     local centerRow = 0
     for index, v in ipairs(screens) do
@@ -417,6 +436,10 @@ function M.render()
         if v.position == nil then
             centerRow = remapsViewport[index].rowEnd + 1
         end
+    end
+    if require('spaceport').getConfig().debug then
+        log("VRender took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
+        startTime = vim.loop.hrtime()
     end
     vim.api.nvim_set_option_value("modifiable", true, {
         buf = buf,
@@ -429,6 +452,10 @@ function M.render()
     vim.api.nvim_set_option_value("modifiable", false, {
         buf = buf,
     })
+    if require('spaceport').getConfig().debug then
+        log("Set lines took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
+        startTime = vim.loop.hrtime()
+    end
 
     local row = 0
     local col = 0
@@ -454,10 +481,19 @@ function M.render()
         col = 0
         row = row + 1
     end
+    if require('spaceport').getConfig().debug then
+        log("Highlights took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
+        startTime = vim.loop.hrtime()
+    end
     if needsRemap then
-        setRemaps(remapsViewport)
+        setRemaps(remapsViewport, screens)
         needsRemap = false
     end
+    if require('spaceport').getConfig().debug then
+        log("Remaps took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
+        startTime = vim.loop.hrtime()
+    end
+    log("Total render took " .. (vim.loop.hrtime() - actualStart) / 1e6 .. "ms")
     -- print("Render time: " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
 end
 

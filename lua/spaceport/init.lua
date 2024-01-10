@@ -9,13 +9,14 @@ local M = {}
 ---@field maxRecentFiles number
 ---@field logPreserveHrs number
 ---@field lastViewTime "pin"|"today"|"yesterday"|"pastWeek"|"pastMonth"|"later"
+---@field debug boolean
 local opts = {
     lastViewTime = "later",
     replaceDirs = {},
     replaceHome = true,
     projectEntry = "Ex",
     logPath = vim.fn.stdpath("log") .. "/spaceport.log",
-    logPreserveHrs = 24,
+    logPreserveHrs = 1,
     sections = {
         "name",
         "remaps",
@@ -23,6 +24,7 @@ local opts = {
         "_global_remaps",
     },
     maxRecentFiles = 0,
+    debug = false,
 }
 
 local startupStart = 0
@@ -46,7 +48,7 @@ function M.setup(_opts)
     hasInit = true
     for k, v in pairs(_opts) do
         if not opts[k] then
-            print("Invalid option for spaceport config: " .. k)
+            M.log("Invalid option for spaceport config: " .. k)
         end
         opts[k] = v
     end
