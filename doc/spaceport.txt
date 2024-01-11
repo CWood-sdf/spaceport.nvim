@@ -1,4 +1,4 @@
-*spaceport.txt*        For Neovim >= 0.8.0        Last change: 2024 January 10
+*spaceport.txt*        For Neovim >= 0.8.0        Last change: 2024 January 11
 
 ==============================================================================
 Table of Contents                                *spaceport-table-of-contents*
@@ -10,7 +10,7 @@ Table of Contents                                *spaceport-table-of-contents*
   - Performance                         |spaceport-spaceport.nvim-performance|
   - Usage                                     |spaceport-spaceport.nvim-usage|
   - Customization                     |spaceport-spaceport.nvim-customization|
-  - Tmux                                       |spaceport-spaceport.nvim-tmux|
+  - Tmux Integration               |spaceport-spaceport.nvim-tmux-integration|
   - Telescope integration     |spaceport-spaceport.nvim-telescope-integration|
 
 ==============================================================================
@@ -92,6 +92,11 @@ The default options are:
         --- Set to true to have more verbose logging
         debug = false,
     
+        -- The path to the log file
+        logPath = vim.fn.stdpath("log") .. "/spaceport.log",
+        -- How many hours to preserve each log entry for
+        logPreserveHours = 24,
+    
     }
 <
 
@@ -115,6 +120,14 @@ hovering over the project or by prefixing the command with the project’s
 number. For example, if I have a project with the number 1, I can type `1p` to
 open that project, or I can move the cursor to hover over the project and press
 `p`.
+
+Spaceport starts out without any history of your favorite directories, so when
+you’re starting out, you will need to do the pattern of cd’ing to a
+directory and then doing `nvim .` to get it to show up in the recents section.
+Once you have a few directories in the recents section, you can start tagging
+them so that you can quickly jump to them.
+
+Here’s an example of starting out with spaceport:
 
 
 CUSTOMIZATION                         *spaceport-spaceport.nvim-customization*
@@ -204,15 +217,15 @@ like this:
     }
 <
 
-Note that not most of these values can be left nil in an actual screen, this is
-just all filled out to show what the possible values are.
+Note that all of these values except lines can be left nil in an actual screen,
+this is just all filled out to show what the possible values are.
 
 If you have a screen that may be universally useful, open a PR with that code
 in a file in the `lua/spaceport/screens/` directory, you can see some other
 files in that directory if you need examples
 
 
-TMUX                                           *spaceport-spaceport.nvim-tmux*
+TMUX INTEGRATION                   *spaceport-spaceport.nvim-tmux-integration*
 
 If you’re in a tmux window, you can call `:Spaceport renameWindow` to rename
 the window, furthermore this information is saved so that whenever you reopen
