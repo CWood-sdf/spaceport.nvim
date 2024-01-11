@@ -2,6 +2,7 @@ local spaceport = require("spaceport")
 local M = {}
 local dataPath = vim.fn.stdpath("data")
 local dataDir = dataPath .. "/spaceport.json"
+local log = spaceport.log
 ---@class (exact) SpaceportDir
 ---@field dir string
 ---@field time number
@@ -20,6 +21,7 @@ local data = {}
 local pinnedData = {}
 ---@type table<string, {time: number, isDir: boolean, pinNumber: number, tmuxWindowName: string|nil, tmuxSessionName: string|nil}>
 local rawData = {}
+-- This is from SO, i forgot the link
 function M.exists(file)
     local ok, _, code = os.rename(file, file)
     if not ok then
@@ -43,10 +45,11 @@ function M.readData()
     if not M.exists(dataDir) then
         local file = io.open(dataDir, "w")
         if file == nil then
+            log("Can not create file at " .. dataDir .. "")
             print("Can not create file at " .. dataDir .. "")
             return {}
         end
-        file:write(vim.fn.json_encode({}))
+        file:write(vim.json.encode({}))
         file:close()
         return {}
     end
@@ -56,7 +59,15 @@ function M.readData()
     end
     local fileContents = file:read("*all")
     file:close()
-    local ret = vim.fn.json_decode(fileContents)
+    if fileContents == nil or fileContents == "" then
+        fileContents = "{}"
+        file = io.open(dataDir, "w")
+        if file ~= nil then
+            file:write(fileContents)
+            file:close()
+        end
+    end
+    local ret = vim.json.decode(fileContents, { object = true, array = true })
     for k, _ in pairs(ret) do
         if ret[k].pinNumber == nil then
             ret[k].pinNumber = 0
@@ -66,6 +77,7 @@ function M.readData()
         end
     end
     if ret == nil then
+        log("Error getting spaceport data")
         print("Error getting spaceport data")
         return {}
     end
@@ -92,10 +104,11 @@ end
 function M.writeData(d)
     local file = io.open(dataDir, "w")
     if file == nil then
+        log("Can not create file at " .. dataDir .. "")
         print("Can not create file at " .. dataDir .. "")
         return
     end
-    file:write(vim.fn.json_encode(d))
+    file:write(vim.json.encode(d))
     file:close()
 end
 
@@ -192,8 +205,6 @@ function M.renameSession(str)
             on_exit = function()
             end,
         })
-    else
-        print("Not currently in tmux")
     end
     rawData[currentDir.dir].tmuxSessionName = currentDir.tmuxSessionName
 end
@@ -211,8 +222,9 @@ function M.renameWindow(str)
             end,
 
         })
-    else
-        print("Not currently in tmux")
+    end
+    if rawData[currentDir.dir] == nil then
+        rawData[currentDir.dir] = {}
     end
     rawData[currentDir.dir].tmuxWindowName = currentDir.tmuxWindowName
     M.writeData(rawData)
@@ -224,7 +236,6 @@ function M.tmuxSplitWindowDown()
         return
     end
     if os.getenv("TMUX") == nil then
-        print("Not currently in tmux")
         return
     end
     vim.fn.jobstart({ "tmux", "split-window", "-c" .. currentDir.dir }, {
@@ -239,7 +250,6 @@ function M.tmuxSplitWindowLeft()
         return
     end
     if os.getenv("TMUX") == nil then
-        print("Not currently in tmux")
         return
     end
     vim.fn.jobstart({ "tmux", "split-window", "-h", "-c" .. currentDir.dir }, {

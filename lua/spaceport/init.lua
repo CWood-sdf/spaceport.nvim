@@ -16,7 +16,7 @@ local opts = {
     replaceHome = true,
     projectEntry = "Ex",
     logPath = vim.fn.stdpath("log") .. "/spaceport.log",
-    logPreserveHrs = 1,
+    logPreserveHrs = 24,
     sections = {
         "name",
         "remaps",
@@ -36,7 +36,7 @@ local function cleanLog()
     end
     local log = vim.fn.readfile(logFile)
     for i = 1, #log do
-        local num = tonumber(vim.fn.split(log[i], " ")[1])
+        local num = vim.fn.strptime("%Y-%m-%d~%H:%M:%S", vim.fn.split(log[i], " ")[1])
         if not num then
             table.remove(log, i)
         elseif num < vim.fn.localtime() - opts.logPreserveHrs * 60 then
@@ -85,7 +85,7 @@ function M.log(msg)
     if (vim.loop.hrtime() - lastClean) / 1e9 > 60 * 60 then
         cleanLog()
     end
-    local str = vim.fn.strftime("%Y-%m-%d %H:%M:%S") .. " " .. msg
+    local str = vim.fn.strftime("%Y-%m-%d~%H:%M:%S") .. " " .. msg
     local logFile = vim.fn.fnamemodify(opts.logPath, ":p") or ""
     local file = io.open(logFile, "a")
     if file == nil then

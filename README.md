@@ -63,6 +63,11 @@ The default options are:
     --- Set to true to have more verbose logging
     debug = false,
 
+    -- The path to the log file
+    logPath = vim.fn.stdpath("log") .. "/spaceport.log",
+    -- How many hours to preserve each log entry for
+    logPreserveHours = 24,
+
 }
 ```
 
@@ -75,6 +80,10 @@ Spaceport is designed to be as fast as possible. The config time measured with l
 Spaceport automatically loads after neovim has started, there is no need to run any commands, but if you want to switch projects, run `:Spaceport` to go back to the start screen.
 
 All the remaps are visible at the top of the screen with the default configuration. Any remap that deals with a project can either be used while hovering over the project or by prefixing the command with the project's number. For example, if I have a project with the number 1, I can type `1p` to open that project, or I can move the cursor to hover over the project and press `p`.
+
+Spaceport starts out without any history of your favorite directories, so when you're starting out, you will need to do the pattern of cd'ing to a directory and then doing `nvim .` to get it to show up in the recents section. Once you have a few directories in the recents section, you can start tagging them so that you can quickly jump to them.
+
+Here's an example of starting out with spaceport:
 
 ## Customization
 
@@ -159,11 +168,11 @@ local i = 0
 }
 ```
 
-Note that not most of these values can be left nil in an actual screen, this is just all filled out to show what the possible values are.
+Note that all of these values except lines can be left nil in an actual screen, this is just all filled out to show what the possible values are.
 
 If you have a screen that may be universally useful, open a PR with that code in a file in the `lua/spaceport/screens/` directory, you can see some other files in that directory if you need examples
 
-## Tmux
+## Tmux Integration
 
 If you're in a tmux window, you can call `:Spaceport renameWindow` to rename the window, furthermore this information is saved so that whenever you reopen that directory, the tmux window name will be changed.
 
