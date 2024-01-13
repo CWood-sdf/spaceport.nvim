@@ -30,7 +30,7 @@ local opts = {
 local lastClean = 0
 
 local function cleanLog()
-    local logFile = vim.fn.fnamemodify(opts.logPath, ":p")
+    local logFile = opts.logPath
     if not require("spaceport.data").exists(logFile) then
         vim.fn.writefile({ "" }, logFile)
     end
@@ -72,6 +72,7 @@ function M.setup(_opts)
         end
         opts[k] = v
     end
+    opts.logPath = vim.fn.fnamemodify(opts.logPath, ":p") or ""
     require("spaceport.setup_auto")
     cleanLog()
 end
@@ -107,27 +108,27 @@ function M._getIgnoreDirs()
 end
 
 function M._swapHomeWithTilde(path)
-    if opts.replaceHome then
-        -- print(os.getenv("HOME"), opts.replaceHome, path, jit.os)
-        if jit.os == "Windows" then
-            return path:gsub(os.getenv("USERPROFILE"), "~")
-        end
-        local home = os.getenv("HOME")
-        local pathCopy = path .. ""
-        local shouldSwap = true
-        for i = 1, #home do
-            if i > #pathCopy then
-                break
-            end
-            if pathCopy:sub(i, i) ~= home:sub(i, i) then
-                shouldSwap = false
-                break
-            end
-        end
-        if shouldSwap then
-            return "~" .. pathCopy:sub(#home + 1)
-        end
+    if not opts.replaceHome then
         return path
+    end
+    -- print(os.getenv("HOME"), opts.replaceHome, path, jit.os)
+    local home = os.getenv("HOME") or ""
+    if jit.os == "Windows" then
+        home = os.getenv("USERPROFILE") or ""
+    end
+    local pathCopy = path .. ""
+    local shouldSwap = true
+    for i = 1, #home do
+        if i > #pathCopy then
+            break
+        end
+        if pathCopy:sub(i, i) ~= home:sub(i, i) then
+            shouldSwap = false
+            break
+        end
+    end
+    if shouldSwap then
+        return "~" .. pathCopy:sub(#home + 1)
     end
     return path
 end

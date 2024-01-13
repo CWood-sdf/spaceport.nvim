@@ -83,8 +83,6 @@ All the remaps are visible at the top of the screen with the default configurati
 
 Spaceport starts out without any history of your favorite directories, so when you're starting out, you will need to do the pattern of cd'ing to a directory and then doing `nvim .` to get it to show up in the recents section. Once you have a few directories in the recents section, you can start tagging them so that you can quickly jump to them.
 
-Here's an example of starting out with spaceport:
-
 ## Customization
 
 Spaceport is completely customizable, anything displayed on the screen can be reconfigured by changing the `sections` option. The default sections are:
