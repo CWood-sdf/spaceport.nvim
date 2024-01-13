@@ -1,4 +1,4 @@
-*spaceport.txt*        For Neovim >= 0.8.0        Last change: 2024 January 11
+*spaceport.txt*        For Neovim >= 0.8.0        Last change: 2024 January 13
 
 ==============================================================================
 Table of Contents                                *spaceport-table-of-contents*
@@ -126,8 +126,6 @@ you’re starting out, you will need to do the pattern of cd’ing to a
 directory and then doing `nvim .` to get it to show up in the recents section.
 Once you have a few directories in the recents section, you can start tagging
 them so that you can quickly jump to them.
-
-Here’s an example of starting out with spaceport:
 
 
 CUSTOMIZATION                         *spaceport-spaceport.nvim-customization*
