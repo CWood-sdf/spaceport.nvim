@@ -200,13 +200,9 @@ function M.renameSession(str)
         return
     end
     currentDir.tmuxSessionName = str
-    if os.getenv("TMUX") ~= nil then
-        vim.fn.jobstart({ "tmux", "rename-session", currentDir.tmuxSessionName }, {
-            on_exit = function()
-            end,
-        })
-    end
     rawData[currentDir.dir].tmuxSessionName = currentDir.tmuxSessionName
+    M.writeData(rawData)
+    M.useSessionName()
 end
 
 function M.renameWindow(str)
@@ -216,18 +212,42 @@ function M.renameWindow(str)
         return
     end
     currentDir.tmuxWindowName = str
-    if os.getenv("TMUX") ~= nil then
-        vim.fn.jobstart({ "tmux", "rename-window", currentDir.tmuxWindowName }, {
-            on_exit = function()
-            end,
-
-        })
-    end
     if rawData[currentDir.dir] == nil then
         rawData[currentDir.dir] = {}
     end
     rawData[currentDir.dir].tmuxWindowName = currentDir.tmuxWindowName
     M.writeData(rawData)
+    M.useWindowName()
+end
+
+function M.useWindowName()
+    if currentDir == nil then
+        print("No spaceport directory selected yet")
+        return
+    end
+    if os.getenv("TMUX") == nil then
+        print("Not in tmux")
+        return
+    end
+    vim.fn.jobstart({ "tmux", "rename-window", currentDir.tmuxWindowName }, {
+        on_exit = function()
+        end,
+    })
+end
+
+function M.useSessionName()
+    if currentDir == nil then
+        print("No spaceport directory selected yet")
+        return
+    end
+    if os.getenv("TMUX") == nil then
+        print("Not in tmux")
+        return
+    end
+    vim.fn.jobstart({ "tmux", "rename-session", currentDir.tmuxSessionName }, {
+        on_exit = function()
+        end,
+    })
 end
 
 function M.tmuxSplitWindowDown()
@@ -264,10 +284,10 @@ function M.doTmuxActions()
         return
     end
     if currentDir.tmuxSessionName ~= nil then
-        M.renameSession(currentDir.tmuxSessionName)
+        M.useSessionName()
     end
     if currentDir.tmuxWindowName ~= nil then
-        M.renameWindow(currentDir.tmuxWindowName)
+        M.useWindowName()
     end
 end
 

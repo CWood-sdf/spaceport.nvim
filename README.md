@@ -36,6 +36,8 @@ The default options are:
 ```lua
 {
 
+    -- This prevents the same directory from being repeated multiple times in the recents section
+    -- For example, I have replaceDirs set to { {"~/projects", "_" } } so that ~/projects is not repeated a ton
     replaceDirs = {},
 
     -- turn /home/user/ into ~/ (also works on windows for C:\Users\user\)
@@ -83,10 +85,9 @@ All the remaps are visible at the top of the screen with the default configurati
 
 Spaceport starts out without any history of your favorite directories, so when you're starting out, you will need to do the pattern of cd'ing to a directory and then doing `nvim .` to get it to show up in the recents section. Once you have a few directories in the recents section, you can start tagging them so that you can quickly jump to them.
 
-This is what spaceport looks like when projects are tagged. 
+This is what spaceport looks like when projects are tagged.
 
 ![image](https://github.com/CWood-sdf/spaceport.nvim/assets/98367120/f07c181b-77c7-47d0-b5a3-451f0ac869e6)
-
 
 ## Customization
 
