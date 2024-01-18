@@ -1,4 +1,4 @@
-*spaceport.txt*        For Neovim >= 0.8.0        Last change: 2024 January 13
+*spaceport.txt*        For Neovim >= 0.8.0        Last change: 2024 January 18
 
 ==============================================================================
 Table of Contents                                *spaceport-table-of-contents*
@@ -65,6 +65,8 @@ The default options are:
 >lua
     {
     
+        -- This prevents the same directory from being repeated multiple times in the recents section
+        -- For example, I have replaceDirs set to { {"~/projects", "_" } } so that ~/projects is not repeated a ton
         replaceDirs = {},
     
         -- turn /home/user/ into ~/ (also works on windows for C:\Users\user\)
