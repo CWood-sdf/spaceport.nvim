@@ -7,15 +7,9 @@ vim.api.nvim_create_user_command("Spaceport", function(opts)
         local command = args[1]
         if command == "renameWindow" then
             local value = args[2]
-            if value == nil then
-                value = vim.fn.getcwd()
-            end
             require("spaceport.data").renameWindow(value)
         elseif command == "renameSession" then
             local value = args[2]
-            if value == nil then
-                value = vim.fn.getcwd()
-            end
             require("spaceport.data").renameSession(value)
         elseif command == "verticalSplit" then
             require("spaceport.data").tmuxSplitWindowDown()
@@ -35,7 +29,7 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
         elseif vim.fn.argc() > 0 then
             -- dir = vim.fn.argv()[1]
             require("spaceport.data").refreshData()
-            local dataToWrite = require("spaceport.data").readData()
+            local dataToWrite = require("spaceport.data").getRawData()
             local time = require("spaceport.utils").getSeconds()
             local argv = vim.fn.argv() or {}
             if type(argv) == "string" then
@@ -64,6 +58,7 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
                 break
             end
             require("spaceport.data").writeData(dataToWrite)
+            require('spaceport.data').refreshData()
             require("spaceport.data").setCurrentDir(dir)
             local screens = require("spaceport.screen").getActualScreens()
             for _, screen in pairs(screens) do

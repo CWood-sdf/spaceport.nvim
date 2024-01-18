@@ -88,11 +88,16 @@ end
 function M.setCurrentDir(dir)
     -- M.refreshData()
     local d = M.getAllData()
+    local found = false
     for _, v in pairs(d) do
         if v.dir == dir then
             currentDir = v
+            found = true
             break
         end
+    end
+    if not found then
+        print("Could not find " .. dir .. " in spaceport data")
     end
     M.doTmuxActions()
     vim.api.nvim_exec_autocmds("User", {
