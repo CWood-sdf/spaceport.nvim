@@ -1,4 +1,4 @@
-*spaceport.txt*        For Neovim >= 0.8.0        Last change: 2024 January 18
+*spaceport.txt*        For Neovim >= 0.8.0        Last change: 2024 January 19
 
 ==============================================================================
 Table of Contents                                *spaceport-table-of-contents*
@@ -12,6 +12,7 @@ Table of Contents                                *spaceport-table-of-contents*
   - Customization                     |spaceport-spaceport.nvim-customization|
   - Tmux Integration               |spaceport-spaceport.nvim-tmux-integration|
   - Telescope integration     |spaceport-spaceport.nvim-telescope-integration|
+  - Events                                   |spaceport-spaceport.nvim-events|
 
 ==============================================================================
 1. Spaceport.nvim                                   *spaceport-spaceport.nvim*
@@ -265,6 +266,13 @@ Or you can search for a specific tmux window or session name:
     
     require('telecope').extensions.spaceport.tmux_sessions()
 <
+
+
+EVENTS                                       *spaceport-spaceport.nvim-events*
+
+Spaceport emits one event `SpaceportDone` when a project is selected. You can
+use this in your lazy configuration to load project based plugins by adding the
+line: `event = "User SpaceportDone"` to the config.
 
 ==============================================================================
 2. Links                                                     *spaceport-links*
