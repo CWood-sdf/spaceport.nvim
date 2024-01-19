@@ -205,3 +205,7 @@ require('telecope').extensions.spaceport.tmux_windows()
 
 require('telecope').extensions.spaceport.tmux_sessions()
 ```
+
+## Events
+
+Spaceport emits one event `SpaceportDone` when a project is selected. You can use this in your lazy configuration to load project based plugins by adding the line: `event = "User SpaceportDone"` to the config.
