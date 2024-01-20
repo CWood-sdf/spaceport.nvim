@@ -41,6 +41,30 @@ function M.isdir(path)
     return M.exists(path .. "/")
 end
 
+function M.importOldfiles(count)
+    local oldfiles = vim.v.oldfiles
+    M.refreshData()
+    local d = M.getRawData()
+    local time = require("spaceport.utils").getSeconds()
+    local i = 1
+    for _, v in pairs(oldfiles) do
+        if d[v] == nil then
+            d[v] = {
+                time = time,
+                isDir = M.isdir(v),
+                pinNumber = 0,
+            }
+        end
+        -- This sorts the oldfiles by time
+        time = time - 1
+        i = i + 1
+        if count ~= nil and i > count then
+            break
+        end
+    end
+    M.writeData(d)
+end
+
 function M.readData()
     if not M.exists(dataDir) then
         local file = io.open(dataDir, "w")

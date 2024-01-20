@@ -10,9 +10,13 @@ I got really annoyed with the pattern of cd'ing to a project folder then doing `
 
 Spaceport automatically keeps track of every file and directory you open neovim to. It then uses this information to provide a list of the most recently used projects. Then you can navigate to a project by selecting it from the list
 
-On top of that, some projects can be tagged so that they always appear as a certain number on the list. For example, I have my neovim dotfiles as tag 1, so in a new terminal window, I can type `nvim` and then `1p` and instantly be at my dotfiles, rather than having to type `cd ~/.config/nvim<CR>nvim .`. When I am going to a tagged project, it usually takes <.5s to be in the project.
+## Tag System
+
+Some projects can be tagged so that they always appear as a certain number on the list. For example, I have my neovim dotfiles as tag 1, so in a new terminal window, I can type `nvim` and then `1p` and instantly be at my dotfiles, rather than having to type `cd ~/.config/nvim<CR>nvim .`.
 
 The tag system is something I've only seen in one other startup plugin: [startup.nvim](https://github.com/startup-nvim/startup.nvim), yet even in startup.nvim the tags have to be manually defined in your config making them really clunky to use.
+
+The tag system when properly used can make it so that you can get to your most used projects in less than half a second.
 
 ## Installation
 
@@ -209,3 +213,7 @@ require('telecope').extensions.spaceport.tmux_sessions()
 ## Events
 
 Spaceport emits one event `SpaceportDone` when a project is selected. You can use this in your lazy configuration to load project based plugins by adding the line: `event = "User SpaceportDone"` to the config.
+
+## Importing vim.v.oldfiles
+
+All other plugins use the `vim.v.oldfiles` to keep track of your most recently used files, rather than your directories. To import this data, just call `:Spaceport importOldfiles` and pass the number of files you want to import as an argument. Spaceport will add them to the database as being opened today because `vim.v.oldfiles` does not provide time data.

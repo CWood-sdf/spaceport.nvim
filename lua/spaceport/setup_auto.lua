@@ -1,20 +1,40 @@
 vim.api.nvim_create_user_command("Spaceport", function(opts)
     -- print(opts.fargs)
+
+    local cmds = {
+        renameWindow = function(args)
+            local value = args[2]
+            require("spaceport.data").renameWindow(value)
+        end,
+        renameSession = function(args)
+            local value = args[2]
+            require("spaceport.data").renameSession(value)
+        end,
+        verticalSplit = function(_)
+            require("spaceport.data").tmuxSplitWindowDown()
+        end,
+        horizontalSplit = function(_)
+            require("spaceport.data").tmuxSplitWindowLeft()
+        end,
+        importOldfiles = function(args)
+            local countStr = args[2]
+            local count = nil
+            if countStr ~= nil then
+                count = tonumber(countStr)
+            end
+            require("spaceport.data").importOldfiles(count)
+            if require("spaceport.screen").isRendering() then
+                require("spaceport.screen").render()
+            end
+        end,
+    }
     if #opts.fargs == 0 or opts.fargs == nil then
         require("spaceport.screen").render()
     else
         local args = opts.fargs
         local command = args[1]
-        if command == "renameWindow" then
-            local value = args[2]
-            require("spaceport.data").renameWindow(value)
-        elseif command == "renameSession" then
-            local value = args[2]
-            require("spaceport.data").renameSession(value)
-        elseif command == "verticalSplit" then
-            require("spaceport.data").tmuxSplitWindowDown()
-        elseif command == "horizontalSplit" then
-            require("spaceport.data").tmuxSplitWindowLeft()
+        if cmds[command] ~= nil then
+            cmds[command](args)
         else
             print("Bad command " .. command)
         end
