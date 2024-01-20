@@ -178,7 +178,7 @@ local i = 0
 
 Note that all of these values except lines can be left nil in an actual screen, this is just all filled out to show what the possible values are.
 
-If you have a screen that may be universally useful, open a PR with that code in a file in the `lua/spaceport/screens/` directory, you can see some other files in that directory if you need examples
+If you have a screen that may be universally useful (like a better looking version of any default screen), open a PR with that code in a file in the `lua/spaceport/screens/` directory, you can see some other files in that directory if you need examples
 
 ## Tmux Integration
 
