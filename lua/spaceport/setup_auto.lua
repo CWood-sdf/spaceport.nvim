@@ -1,6 +1,4 @@
 vim.api.nvim_create_user_command("Spaceport", function(opts)
-    -- print(opts.fargs)
-
     local cmds = {
         renameWindow = function(args)
             local value = args[2]
@@ -50,6 +48,9 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
             -- dir = vim.fn.argv()[1]
             require("spaceport.data").refreshData()
             local dataToWrite = require("spaceport.data").getRawData()
+            if dataToWrite == nil then
+                dataToWrite = {}
+            end
             local time = require("spaceport.utils").getSeconds()
             local argv = vim.fn.argv() or {}
             if type(argv) == "string" then

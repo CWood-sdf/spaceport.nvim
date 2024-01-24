@@ -28,6 +28,7 @@ local SpaceportScreen = {}
 local M = {}
 
 local log = require("spaceport").log
+---@param remap SpaceportRemap
 local function sanitizeRemap(remap)
     if remap.mode == nil then
         log("Invalid remap: " .. vim.inspect(remap))
@@ -114,6 +115,9 @@ function M.getActualScreens()
                 error("Invalid screen: " .. screen)
             end
             screen = s
+        end
+        if type(screen) == "function" then
+            screen = screen()
         end
         if sanitizeScreen(screen) then
             table.insert(screens, screen)
@@ -273,6 +277,8 @@ local function setRemaps(viewport, screens)
     end
 end
 
+-- Returns the length in bytes of the utf8 character
+-- Copilot wrote this and it actually werks
 local function codepointLen(utf8Char)
     if utf8Char:byte() < 128 then
         return 1
@@ -546,7 +552,6 @@ function M.render()
         startTime = vim.loop.hrtime()
     end
     log("Total render took " .. (vim.loop.hrtime() - actualStart) / 1e6 .. "ms")
-    -- print("Render time: " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
 end
 
 return M

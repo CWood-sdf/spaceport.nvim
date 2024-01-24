@@ -50,14 +50,15 @@ end
 local startupStart = 0
 local startupTime = 0
 
-function M.timeStartup()
+function M.__timeStartup()
     startupStart = vim.loop.hrtime()
 end
 
-function M.timeStartupEnd()
+function M.__timeStartupEnd()
     startupTime = vim.loop.hrtime() - startupStart
 end
 
+---@return number
 function M.getStartupTime()
     return startupTime / 1e6
 end
@@ -95,18 +96,23 @@ function M.log(msg)
     file:write(str .. "\n")
 end
 
+---@return number
 function M._getMaxRecentFiles()
     return opts.maxRecentFiles
 end
 
+---@return boolean
 function M._getHasInit()
     return hasInit
 end
 
+---@return (string|string[])[]
 function M._getIgnoreDirs()
     return opts.replaceDirs
 end
 
+---@return string
+---@param path string
 function M._swapHomeWithTilde(path)
     if not opts.replaceHome then
         return path
@@ -133,6 +139,8 @@ function M._swapHomeWithTilde(path)
     return path
 end
 
+---@return string
+---@param path string
 function M._fixDir(path)
     ---@type string
     local ret = M._swapHomeWithTilde(path)
@@ -150,6 +158,7 @@ function M._fixDir(path)
     return ret
 end
 
+---@return (string | fun(): SpaceportConfig | SpaceportConfig )[]
 function M._getSections()
     return opts.sections
 end
@@ -162,6 +171,7 @@ function M._projectEntryCommand()
     end
 end
 
+---@return SpaceportConfig
 function M.getConfig()
     return opts
 end

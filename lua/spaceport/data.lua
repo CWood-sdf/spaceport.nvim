@@ -3,6 +3,7 @@ local M = {}
 local dataPath = vim.fn.stdpath("data")
 local dataDir = dataPath .. "/spaceport.json"
 local log = spaceport.log
+
 ---@class (exact) SpaceportDir
 ---@field dir string
 ---@field time number
@@ -19,9 +20,15 @@ local currentDir = nil
 local data = {}
 ---@type SpaceportDir[]
 local pinnedData = {}
----@type table<string, {time: number, isDir: boolean, pinNumber: number, tmuxWindowName: string|nil, tmuxSessionName: string|nil}>
+
+
+---@alias SpaceportRawData table<string, {time: number, isDir: boolean, pinNumber: number, tmuxWindowName: string|nil, tmuxSessionName: string|nil}>
+
+---@type SpaceportRawData
 local rawData = {}
 -- This is from SO, i forgot the link
+---@param file string
+---@return boolean
 function M.exists(file)
     local ok, _, code = os.rename(file, file)
     if not ok then
@@ -36,17 +43,26 @@ function M.exists(file)
     return ok
 end
 
+---@param path string
+---@return boolean
 function M.isdir(path)
     -- "/" works on both Unix and Windows
     return M.exists(path .. "/")
 end
 
+---@param count number|nil
 function M.importOldfiles(count)
     local oldfiles = vim.v.oldfiles
     M.refreshData()
     local d = M.getRawData()
     local time = require("spaceport.utils").getSeconds()
     local i = 1
+    if d == nil then
+        -- should never hapen but just in case
+        log("Error getting spaceport data in importOldfiles (d is nil)")
+        return
+    end
+
     for _, v in pairs(oldfiles) do
         if d[v] == nil then
             d[v] = {
@@ -65,6 +81,30 @@ function M.importOldfiles(count)
     M.writeData(d)
 end
 
+---@param d SpaceportRawData
+---@return SpaceportRawData
+local function sanitizeJsonData(d)
+    local ret = {}
+    for k, v in pairs(d) do
+        if v.pinNumber == nil then
+            v.pinNumber = 0
+        end
+        if v.time == nil then
+            log("No time for " .. k .. " setting to current time")
+            v.time = require("spaceport.utils").getSeconds()
+        end
+        if v.isDir == nil then
+            log("No isDir for " .. k .. " setting to false")
+            v.isDir = false
+        end
+
+        ret[k] = v
+    end
+    return ret
+end
+
+
+---@return SpaceportRawData
 function M.readData()
     if not M.exists(dataDir) then
         local file = io.open(dataDir, "w")
@@ -92,14 +132,7 @@ function M.readData()
         end
     end
     local ret = vim.json.decode(fileContents, { object = true, array = true })
-    for k, _ in pairs(ret) do
-        if ret[k].pinNumber == nil then
-            ret[k].pinNumber = 0
-        end
-        if ret[k].pinned ~= nil then
-            ret[k].pinned = nil
-        end
-    end
+    ret = sanitizeJsonData(ret)
     if ret == nil then
         log("Error getting spaceport data")
         print("Error getting spaceport data")
@@ -130,6 +163,7 @@ function M.setCurrentDir(dir)
     })
 end
 
+---@param d SpaceportRawData
 function M.writeData(d)
     local file = io.open(dataDir, "w")
     if file == nil then
@@ -175,7 +209,6 @@ end
 
 ---@return SpaceportDir[]
 function M.getAllData()
-    -- M.refreshData()
     local ret = {}
     for _, v in pairs(data) do
         table.insert(ret, v)
@@ -191,7 +224,6 @@ end
 
 ---@return SpaceportDir[]
 function M.getMruData()
-    -- M.refreshData()
     local ret = {}
     if require("spaceport")._getMaxRecentFiles() == 0 then
         return data
@@ -207,21 +239,20 @@ end
 
 ---@return SpaceportDir[]
 function M.getAllMruData()
-    -- M.refreshData()
     return data
 end
 
 ---@return SpaceportDir[]
 function M.getPinnedData()
-    -- M.refreshData()
     return pinnedData
 end
 
+---@return SpaceportRawData
 function M.getRawData()
-    -- M.refreshData()
     return rawData
 end
 
+---@param str string
 function M.renameSession(str)
     M.refreshData()
     if currentDir == nil then
@@ -234,6 +265,7 @@ function M.renameSession(str)
     M.useSessionName()
 end
 
+---@param str string
 function M.renameWindow(str)
     M.refreshData()
     if currentDir == nil then
@@ -249,6 +281,7 @@ function M.renameWindow(str)
     M.useWindowName()
 end
 
+-- Changes the window name to be the one in currentDir
 function M.useWindowName()
     if currentDir == nil then
         print("No spaceport directory selected yet")
@@ -264,6 +297,7 @@ function M.useWindowName()
     })
 end
 
+-- Changes the session name to be the one in currentDir
 function M.useSessionName()
     if currentDir == nil then
         print("No spaceport directory selected yet")
@@ -279,6 +313,7 @@ function M.useSessionName()
     })
 end
 
+-- Splits the window horizontally in tmux
 function M.tmuxSplitWindowDown()
     if currentDir == nil then
         print("No spaceport directory selected yet")
@@ -293,6 +328,7 @@ function M.tmuxSplitWindowDown()
     })
 end
 
+-- Splits the window vertically in tmux
 function M.tmuxSplitWindowLeft()
     if currentDir == nil then
         print("No spaceport directory selected yet")
@@ -307,6 +343,7 @@ function M.tmuxSplitWindowLeft()
     })
 end
 
+-- Renames window and/or session if they are set
 function M.doTmuxActions()
     if currentDir == nil then
         print("No spaceport directory selected yet")
@@ -323,6 +360,13 @@ end
 ---@param str string
 function M.removeDir(str)
     local d = M.getRawData()
+    if d == nil then
+        M.refreshData()
+        d = M.getRawData()
+    end
+    if d == nil then
+        return
+    end
     if d[str].pinNumber ~= 0 then
         local pin = d[str].pinNumber
         for _, v in pairs(d) do
@@ -337,7 +381,6 @@ end
 
 ---@param dir SpaceportDir
 function M.cd(dir)
-    -- M.refreshData()
     rawData[dir.dir].time = require("spaceport.utils").getSeconds()
     M.writeData(rawData)
     local screens = require("spaceport.screen").getActualScreens()
