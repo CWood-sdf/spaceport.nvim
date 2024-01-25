@@ -40,7 +40,7 @@ vim.api.nvim_create_user_command("Spaceport", function(opts)
 end, { nargs = "*" })
 vim.api.nvim_create_autocmd({ "UiEnter" }, {
     callback = function()
-        require("spaceport").timeStartup()
+        require("spaceport").__timeStartup()
 
         if vim.fn.argc() == 0 then
             require("spaceport.screen").render()
@@ -88,7 +88,7 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
                 end
             end
         end
-        require("spaceport").timeStartupEnd()
+        require("spaceport").__timeStartupEnd()
     end,
 })
 vim.api.nvim_create_autocmd({ "VimResized" }, {
