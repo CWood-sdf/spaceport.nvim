@@ -5,6 +5,15 @@ local pinned
 local function l()
     mru = require("spaceport.data").getMruData()
     pinned = require("spaceport.data").getPinnedData()
+    if require('spaceport')._getMaxRecentFiles() ~= 0 then
+        local tmpMru = {}
+        local i = 1
+        while #tmpMru + #pinned < require('spaceport')._getMaxRecentFiles() and #mru > 0 do
+            table.insert(tmpMru, mru[i])
+            i = i + 1
+        end
+        mru = tmpMru
+    end
     local lastView = require("spaceport").getConfig().lastViewTime
     local lines = {}
     local i = 1
