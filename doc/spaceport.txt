@@ -1,4 +1,4 @@
-*spaceport.txt*        For Neovim >= 0.8.0        Last change: 2024 January 27
+*spaceport.txt*        For Neovim >= 0.8.0        Last change: 2024 January 29
 
 ==============================================================================
 Table of Contents                                *spaceport-table-of-contents*
@@ -14,6 +14,7 @@ Table of Contents                                *spaceport-table-of-contents*
   - Tmux Integration               |spaceport-spaceport.nvim-tmux-integration|
   - Telescope integration     |spaceport-spaceport.nvim-telescope-integration|
   - Events                                   |spaceport-spaceport.nvim-events|
+  - Spaceport Buffer Name     |spaceport-spaceport.nvim-spaceport-buffer-name|
   - Importing vim.v.oldfiles|spaceport-spaceport.nvim-importing-vim.v.oldfiles|
 
 ==============================================================================
@@ -278,9 +279,16 @@ Or you can search for a specific tmux window or session name:
 
 EVENTS                                       *spaceport-spaceport.nvim-events*
 
-Spaceport emits one event `SpaceportDone` when a project is selected. You can
-use this in your lazy configuration to load project based plugins by adding the
-line: `event = "User SpaceportDone"` to the config.
+Spaceport emits two events:
+
+- `SpaceportEnter`This event is emitted when spaceport is entered
+- `SpaceportDone`This event is emitted when the project is exited, or when neovim is started with a file or directory argument
+
+
+SPACEPORT BUFFER NAME         *spaceport-spaceport.nvim-spaceport-buffer-name*
+
+The spaceport buffer is named `spaceport` with a filetype of `spaceport`. You
+can use this to set up autocommands for when spaceport is entered or exited
 
 
 IMPORTING VIM.V.OLDFILES   *spaceport-spaceport.nvim-importing-vim.v.oldfiles*
@@ -290,6 +298,10 @@ used files, rather than your directories. To import this data, just call
 `:Spaceport importOldfiles` and pass the number of files you want to import as
 an argument. Spaceport will add them to the database as being opened today
 because `vim.v.oldfiles` does not provide time data.
+
+>
+    
+<
 
 ==============================================================================
 2. Links                                                     *spaceport-links*
