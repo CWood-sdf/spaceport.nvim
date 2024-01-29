@@ -212,8 +212,19 @@ require('telecope').extensions.spaceport.tmux_sessions()
 
 ## Events
 
-Spaceport emits one event `SpaceportDone` when a project is selected. You can use this in your lazy configuration to load project based plugins by adding the line: `event = "User SpaceportDone"` to the config.
+Spaceport emits two events:
+
+- `SpaceportEnter`: This event is emitted when spaceport is entered
+- `SpaceportDone`: This event is emitted when the project is exited, or when neovim is started with a file or directory argument
+
+## Spaceport Buffer Name
+
+The spaceport buffer is named `spaceport` with a filetype of `spaceport`. You can use this to set up autocommands for when spaceport is entered or exited
 
 ## Importing vim.v.oldfiles
 
 All other plugins use the `vim.v.oldfiles` to keep track of your most recently used files, rather than your directories. To import this data, just call `:Spaceport importOldfiles` and pass the number of files you want to import as an argument. Spaceport will add them to the database as being opened today because `vim.v.oldfiles` does not provide time data.
+
+```
+
+```

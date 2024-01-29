@@ -475,6 +475,10 @@ function M.render()
     vim.api.nvim_set_option_value("buftype", "nofile", {
         buf = buf,
     })
+    vim.api.nvim_buf_set_name(buf, "spaceport")
+    vim.api.nvim_set_option_value("filetype", "spaceport", {
+        buf = buf,
+    })
     vim.api.nvim_set_option_value("bufhidden", "wipe", {
         buf = buf,
     })

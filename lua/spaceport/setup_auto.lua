@@ -27,6 +27,9 @@ vim.api.nvim_create_user_command("Spaceport", function(opts)
         end,
     }
     if #opts.fargs == 0 or opts.fargs == nil then
+        vim.api.nvim_exec_autocmds("User", {
+            pattern = "SpaceportEnter",
+        })
         require("spaceport.screen").render()
     else
         local args = opts.fargs
@@ -43,6 +46,9 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
         require("spaceport").__timeStartup()
 
         if vim.fn.argc() == 0 then
+            vim.api.nvim_exec_autocmds("User", {
+                pattern = "SpaceportEnter",
+            })
             require("spaceport.screen").render()
         elseif vim.fn.argc() > 0 then
             -- dir = vim.fn.argv()[1]
