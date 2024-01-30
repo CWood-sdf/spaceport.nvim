@@ -1,31 +1,37 @@
+local allCmds = {
+    Spaceport = {},
+}
+local cmds = {
+    renameWindow = function(args)
+        local value = args[1]
+        require("spaceport.data").renameWindow(value)
+    end,
+    renameSession = function(args)
+        local value = args[1]
+        require("spaceport.data").renameSession(value)
+    end,
+    verticalSplit = function(_)
+        require("spaceport.data").tmuxSplitWindowDown()
+    end,
+    horizontalSplit = function(_)
+        require("spaceport.data").tmuxSplitWindowLeft()
+    end,
+    importOldfiles = function(args)
+        local countStr = args[1]
+        local count = nil
+        if countStr ~= nil then
+            count = tonumber(countStr)
+        end
+        require("spaceport.data").importOldfiles(count)
+        if require("spaceport.screen").isRendering() then
+            require("spaceport.screen").render()
+        end
+    end,
+}
+for k, _ in pairs(cmds) do
+    allCmds.Spaceport[k] = {}
+end
 vim.api.nvim_create_user_command("Spaceport", function(opts)
-    local cmds = {
-        renameWindow = function(args)
-            local value = args[2]
-            require("spaceport.data").renameWindow(value)
-        end,
-        renameSession = function(args)
-            local value = args[2]
-            require("spaceport.data").renameSession(value)
-        end,
-        verticalSplit = function(_)
-            require("spaceport.data").tmuxSplitWindowDown()
-        end,
-        horizontalSplit = function(_)
-            require("spaceport.data").tmuxSplitWindowLeft()
-        end,
-        importOldfiles = function(args)
-            local countStr = args[2]
-            local count = nil
-            if countStr ~= nil then
-                count = tonumber(countStr)
-            end
-            require("spaceport.data").importOldfiles(count)
-            if require("spaceport.screen").isRendering() then
-                require("spaceport.screen").render()
-            end
-        end,
-    }
     if #opts.fargs == 0 or opts.fargs == nil then
         vim.api.nvim_exec_autocmds("User", {
             pattern = "SpaceportEnter",
@@ -34,13 +40,63 @@ vim.api.nvim_create_user_command("Spaceport", function(opts)
     else
         local args = opts.fargs
         local command = args[1]
+        local i = 2
+        while type(command) == "table" do
+            command = command[args[i]]
+            i = i + 1
+        end
+        local actualArgs = {}
+        while i <= #args do
+            table.insert(actualArgs, args[i])
+            i = i + 1
+        end
         if cmds[command] ~= nil then
-            cmds[command](args)
+            cmds[command](actualArgs)
         else
             print("Bad command " .. command)
         end
     end
-end, { nargs = "*" })
+end, {
+    nargs = "*",
+    complete = function(working, current, _)
+        local tempCmds = allCmds
+        local i = 1
+        local cmdStr = ""
+        while i <= #current do
+            local c = current:sub(i, i)
+            if c == " " then
+                if tempCmds[cmdStr] ~= nil then
+                    tempCmds = tempCmds[cmdStr]
+                    cmdStr = ""
+                else
+                    return {}
+                end
+            else
+                cmdStr = cmdStr .. c
+            end
+            i = i + 1
+        end
+        if tempCmds ~= nil then
+            local ret = {}
+            for k, _ in pairs(tempCmds) do
+                table.insert(ret, k)
+            end
+            local clean = false
+            while not clean do
+                clean = true
+                for p, v in ipairs(ret) do
+                    if v:sub(1, #working) ~= working then
+                        table.remove(ret, p)
+                        clean = false
+                        break
+                    end
+                end
+            end
+
+            return ret
+        end
+    end,
+})
 vim.api.nvim_create_autocmd({ "UiEnter" }, {
     callback = function()
         require("spaceport").__timeStartup()

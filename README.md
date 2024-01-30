@@ -42,6 +42,11 @@ The default options are:
 
     -- This prevents the same directory from being repeated multiple times in the recents section
     -- For example, I have replaceDirs set to { {"~/projects", "_" } } so that ~/projects is not repeated a ton
+    -- Note every element is applied to the directory in order,
+    --   so if you have { {"~/projects", "_"} } and you also want to replace
+    --   ~/projects/foo with @, then you would need
+    --   { {"~/projects/foo", "@"}, {"~/projects", "_"} }
+    --   or { {"~/projects", "_"}, {"_/foo", "@"} }
     replaceDirs = {},
 
     -- turn /home/user/ into ~/ (also works on windows for C:\Users\user\)
@@ -115,6 +120,20 @@ All the preconfigured sections are:
 - `name_blue_green`: This section displays the ascii art logo, but with a blue-green gradient
 - `hacker_news`: This section displays the top 5 stories on hacker news
 
+### Default Screen Highlight Groups
+
+If you want to change the highlighting of the recents or remaps sections, you can set any of the following highlight groups: `SpaceportRemapDescription`, `SpaceportRemapKey`, `SpaceportRecentsTitle`, `SpaceportRecentsProject`, or `SpaceportRecentsCount`
+
+The code to do that would look like this:
+
+```lua
+vim.api.nvim_set_hl(0, "SpaceportRecentsTitle", {
+    fg = "red",
+})
+```
+
+### Custom Screens
+
 If you want to have your own section, you can add a table entry to the `sections` array. The table entry should conform to the type `SpaceportScreen` defined in `lua/spaceport/screen.lua`. An example screen could be something like this:
 
 ```lua
@@ -132,6 +151,10 @@ local i = 0
                 -- [1] = the text to display
                 -- colorOpts = the options to pass to `vim.api.nvim_set_hl`
                 -- See [nvim_set_hl docs](https://neovim.io/doc/user/api.html#nvim_set_hl())
+
+                -- Alternatively, if you want the value to be customizable, you can set the
+                --   _name field to the name of a global highlight group along with all the other values
+                --   If spaceport detects that the global highlight group exists, it will use that, otherwise it will use the colorOpts
                 {
                     i .. "",
                     colorOpts = {
@@ -224,7 +247,3 @@ The spaceport buffer is named `spaceport` with a filetype of `spaceport`. You ca
 ## Importing vim.v.oldfiles
 
 All other plugins use the `vim.v.oldfiles` to keep track of your most recently used files, rather than your directories. To import this data, just call `:Spaceport importOldfiles` and pass the number of files you want to import as an argument. Spaceport will add them to the database as being opened today because `vim.v.oldfiles` does not provide time data.
-
-```
-
-```

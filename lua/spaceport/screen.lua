@@ -28,6 +28,8 @@ local SpaceportScreen = {}
 local M = {}
 
 local log = require("spaceport").log
+
+-- Sanitize functions {
 ---@param remap SpaceportRemap
 local function sanitizeRemap(remap)
     if remap.mode == nil then
@@ -53,9 +55,46 @@ local function sanitizeScreenPosition(pos)
     end
     return false
 end
+local function sanitizeLines(lines)
+    if lines == nil then
+        return false
+    end
+    if type(lines) == "function" then
+        -- Can't sanitize functions bc we get stack overflow
+        return true
+    end
+    if type(lines) ~= "table" then
+        log("Invalid lines: " .. vim.inspect(lines))
+        return false
+    end
+    for _, line in ipairs(lines) do
+        if type(line) == "string" then
+            -- pass
+        elseif type(line) == "table" then
+            for _, word in ipairs(line) do
+                if type(word) == "string" then
+                    -- pass
+                elseif type(word) == "table" then
+                    if word[1] == nil then
+                        log("Invalid word: " .. vim.inspect(word))
+                        return false
+                    end
+                else
+                    log("Invalid word: " .. vim.inspect(word))
+                    return false
+                end
+            end
+        else
+            log("Invalid line: " .. vim.inspect(line))
+            return false
+        end
+    end
+    return true
+end
 local function sanitizeScreen(screen)
-    if screen.lines == nil then
+    if not sanitizeLines(screen.lines) then
         log("Invalid screen: " .. vim.inspect(screen))
+        return false
     elseif screen.remaps ~= nil then
         for _, remap in ipairs(screen.remaps) do
             if not sanitizeRemap(remap) then
@@ -69,6 +108,7 @@ local function sanitizeScreen(screen)
     end
     return true
 end
+-- }
 
 local buf = nil
 local width = 0
@@ -77,6 +117,23 @@ local hlId = 0
 function M.isRendering()
     return buf ~= nil and vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_get_current_buf() == buf
 end
+
+-- Helper functions {
+
+-- Returns the length in bytes of the utf8 character
+-- Copilot wrote this and it actually works :O
+local function codepointLen(utf8Char)
+    if utf8Char:byte() < 128 then
+        return 1
+    elseif utf8Char:byte() < 224 then
+        return 2
+    elseif utf8Char:byte() < 240 then
+        return 3
+    else
+        return 4
+    end
+end
+
 
 ---@param str string
 ---@return number
@@ -107,20 +164,22 @@ function M.getActualScreens()
     ---@type SpaceportScreen[]
     local screens = {}
     for _, screen in ipairs(configScreens) do
+        ---@type SpaceportConfig
+        local conf
         if type(screen) == "string" then
             -- log("screen: " .. screen)
             local ok, s = pcall(require, "spaceport.screens." .. screen)
             if not ok then
-                log("Invalid screen: " .. screen)
-                error("Invalid screen: " .. screen)
+                log("Invalid screen (require not found): " .. screen)
             end
-            screen = s
+            conf = s
+        elseif type(screen) == "function" then
+            conf = screen()
+        else
+            conf = screen
         end
-        if type(screen) == "function" then
-            screen = screen()
-        end
-        if sanitizeScreen(screen) then
-            table.insert(screens, screen)
+        if sanitizeScreen(conf) then
+            table.insert(screens, conf)
         else
             table.insert(screens, {
                 lines = {
@@ -135,6 +194,10 @@ function M.getActualScreens()
     return screens
 end
 
+-- }
+
+
+-- Word/string manipulation functions {
 ---@return string
 ---@param str string
 ---@param w? number
@@ -234,6 +297,8 @@ function M.rowToWordArray(row)
     return ret
 end
 
+-- }
+
 local needsRemap = true
 
 ---@param viewport SpaceportViewport[]
@@ -274,20 +339,6 @@ local function setRemaps(viewport, screens)
             end
         end
         -- startLine = startLine + v.topBuffer + (v.title ~= nil and 1 or 0) + #lines
-    end
-end
-
--- Returns the length in bytes of the utf8 character
--- Copilot wrote this and it actually werks
-local function codepointLen(utf8Char)
-    if utf8Char:byte() < 128 then
-        return 1
-    elseif utf8Char:byte() < 224 then
-        return 2
-    elseif utf8Char:byte() < 240 then
-        return 3
-    else
-        return 4
     end
 end
 
@@ -450,6 +501,7 @@ function M.render()
         log("Refresh took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
         startTime = vim.loop.hrtime()
     end
+
     if hlNs ~= nil then
         vim.api.nvim_buf_clear_namespace(0, hlNs, 0, -1)
         hlNs = nil
@@ -457,6 +509,7 @@ function M.render()
     hlId = 0
     hlNs = vim.api.nvim_create_namespace("Spaceport")
     vim.api.nvim_win_set_hl_ns(0, hlNs)
+
     width = vim.api.nvim_win_get_width(0)
     if require('spaceport').getConfig().debug then
         log("Width took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
@@ -491,7 +544,8 @@ function M.render()
         log("Buf took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
         startTime = vim.loop.hrtime()
     end
-    -- local totalTime = 0
+
+    -- This variable keeps track of the row that the next centered screen should start at for remaps
     local centerRow = 0
     for index, v in ipairs(screens) do
         gridLines, remapsViewport[index] = renderGrid(v, gridLines, centerRow)
@@ -503,6 +557,7 @@ function M.render()
         log("VRender took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
         startTime = vim.loop.hrtime()
     end
+
     vim.api.nvim_set_option_value("modifiable", true, {
         buf = buf,
     })
@@ -528,7 +583,28 @@ function M.render()
             if word.colorOpts ~= nil then
                 local hlGroup = ""
                 local optsStr = vim.inspect(word.colorOpts)
-                if usedHighlights[optsStr] ~= nil then
+                local ns = hlNs
+
+                if word.colorOpts._name ~= nil then
+                    ns = 0
+                    hlGroup = word.colorOpts._name
+                    local hl = vim.api.nvim_get_hl(ns, {
+                        name = hlGroup,
+                    })
+                    local keysCount = #vim.tbl_keys(word.colorOpts)
+                    local hlNotExists = vim.json.encode(hl) == "{}"
+                    -- Apparently i have to use json to detect vim.empty_dict()
+                    if hlNotExists and keysCount > 1 then
+                        local opts = vim.deepcopy(word.colorOpts)
+                        opts._name = nil
+                        vim.api.nvim_set_hl(ns, hlGroup, opts)
+                        if require('spaceport').getConfig().debug then
+                            log("Created global highlight group: " .. hlGroup)
+                        end
+                    elseif hlNotExists then
+                        hlGroup = "Normal"
+                    end
+                elseif usedHighlights[optsStr] ~= nil then
                     hlGroup = usedHighlights[optsStr]
                 else
                     hlGroup = "spaceport_hl_" .. hlId
@@ -536,7 +612,7 @@ function M.render()
                     hlId = hlId + 1
                     usedHighlights[optsStr] = hlGroup
                 end
-                vim.api.nvim_buf_add_highlight(buf, hlNs, hlGroup, row, col, col + #word[1])
+                vim.api.nvim_buf_add_highlight(buf, ns, hlGroup, row, col, col + #word[1])
             end
             col = col + #word[1]
         end
