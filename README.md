@@ -154,7 +154,7 @@ local i = 0
 
                 -- Alternatively, if you want the value to be customizable, you can set the
                 --   _name field to the name of a global highlight group along with all the other values
-                --   If spaceport detects that the global highlight group exists, it will use that, otherwise it will use the colorOpts
+                --   If spaceport detects that the global highlight group exists, it will use that, otherwise it will create the highlight group with the given values
                 {
                     i .. "",
                     colorOpts = {
