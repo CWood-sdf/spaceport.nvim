@@ -55,11 +55,12 @@ local function sanitizeScreenPosition(pos)
     end
     return false
 end
-local function sanitizeLines(lines)
+---@param ignoreFn boolean
+local function sanitizeLines(lines, ignoreFn)
     if lines == nil then
         return false
     end
-    if type(lines) == "function" then
+    if type(lines) == "function" and ignoreFn then
         -- Can't sanitize functions bc we get stack overflow
         return true
     end
@@ -71,11 +72,16 @@ local function sanitizeLines(lines)
         if type(line) == "string" then
             -- pass
         elseif type(line) == "table" then
+            --- line is SpaceportWord[]
             for _, word in ipairs(line) do
-                if type(word) == "string" then
-                    -- pass
-                elseif type(word) == "table" then
+                -- word is SpaceportWord
+                if type(word) == "table" then
+                    word = word ---@as SpaceportWord
                     if word[1] == nil then
+                        log("Invalid word: " .. vim.inspect(word))
+                        return false
+                    end
+                    if type(word[1]) ~= "string" then
                         log("Invalid word: " .. vim.inspect(word))
                         return false
                     end
@@ -92,7 +98,7 @@ local function sanitizeLines(lines)
     return true
 end
 local function sanitizeScreen(screen)
-    if not sanitizeLines(screen.lines) then
+    if not sanitizeLines(screen.lines, true) then
         log("Invalid screen: " .. vim.inspect(screen))
         return false
     elseif screen.remaps ~= nil then
@@ -114,8 +120,19 @@ local buf = nil
 local width = 0
 local hlNs = nil
 local hlId = 0
+local isExiting = false
 function M.isRendering()
-    return buf ~= nil and vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_get_current_buf() == buf
+    return buf ~= nil and vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_get_current_buf() == buf and not isExiting
+end
+
+function M.exit()
+    isExiting = true
+    if buf ~= nil and vim.api.nvim_buf_is_valid(buf) then
+        vim.api.nvim_buf_delete(buf, {
+            force = true,
+        })
+    end
+    buf = nil
 end
 
 -- Helper functions {
@@ -264,6 +281,19 @@ function M.wordArrayToString(line)
     return ret
 end
 
+---@return number
+---@param line string|SpaceportWord[]
+function M.wordArrayUtf8Len(line)
+    if type(line) == "string" then
+        return utf8Len(line)
+    end
+    local ret = 0
+    for _, v in ipairs(line) do
+        ret = ret + utf8Len(v[1])
+    end
+    return ret
+end
+
 ---@return SpaceportWord[]
 ---@param words SpaceportWord[]
 ---@param w number
@@ -374,6 +404,9 @@ local function renderGrid(screen, gridLines, centerRow)
     local screenLines = screen.lines
     if type(screenLines) == "function" then
         screenLines = screenLines()
+        if not sanitizeLines(screenLines, false) then
+            screenLines = { "Invalid screen" }
+        end
     end
     for _, line in ipairs(screenLines) do
         table.insert(lines, line)
@@ -382,7 +415,7 @@ local function renderGrid(screen, gridLines, centerRow)
     local maxHeight = #lines
     local maxWidth = 0
     for _, l in ipairs(lines) do
-        local len = utf8Len(M.wordArrayToString(l))
+        local len = M.wordArrayUtf8Len(l)
         if len > maxWidth then
             maxWidth = len
         end
@@ -453,9 +486,12 @@ local function renderGrid(screen, gridLines, centerRow)
         end
         for _, w in ipairs(words) do
             local colorOpts = w.colorOpts
+            -- This whole q business is because of utf8
             local q = 1
             while q <= #w[1] do
+                -- The length of the utf8 char is determinable by the first byte
                 local len = codepointLen(w[1]:sub(q, q))
+                -- The actual utf8 char
                 local char = w[1]:sub(q, q + len - 1)
                 q = q + len
                 -- basically don't have the buffer spaces overriding actual text beneath it

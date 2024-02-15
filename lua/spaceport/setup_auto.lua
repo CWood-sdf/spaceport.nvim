@@ -160,3 +160,20 @@ vim.api.nvim_create_autocmd({ "VimResized" }, {
         end
     end,
 })
+
+vim.api.nvim_create_autocmd({ "QuitPre", "ExitPre" }, {
+    callback = function()
+        -- This is needed bc if there's an animation, it's calls to render() will override the quit
+        if require("spaceport.screen").isRendering() then
+            local screens = require("spaceport.screen").getActualScreens()
+            -- Kill all the screens gracefully
+            for _, screen in pairs(screens) do
+                if screen.onExit ~= nil then
+                    screen.onExit()
+                end
+            end
+            -- Force quit
+            require('spaceport.screen').exit()
+        end
+    end,
+})
