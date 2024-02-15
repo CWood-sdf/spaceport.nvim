@@ -431,8 +431,10 @@ local function renderGrid(screen, gridLines, centerRow)
     -- make it so that the gridLines is big enough to fit everything
     while #gridLines < startRow + maxHeight do
         local newLine = {}
-        while utf8Len(M.wordArrayToString(newLine)) < width - 2 do
+        local k = 0
+        while k < width - 2 do
             table.insert(newLine, { " " })
+            k = k + 1
         end
         table.insert(gridLines, newLine)
     end
@@ -632,6 +634,9 @@ function M.render()
         startTime = vim.loop.hrtime()
     end
     log("Total render took " .. (vim.loop.hrtime() - actualStart) / 1e6 .. "ms")
+    if require('spaceport').getConfig().debug then
+        log("")
+    end
 end
 
 return M

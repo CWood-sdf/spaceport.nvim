@@ -84,7 +84,7 @@ The default options are:
 
 ## Performance
 
-Spaceport is designed to be as fast as possible. The config time measured with lazy.nvim is ~0.2ms with the default configuration. Each render cycle takes only about 20-40ms.
+Spaceport is designed to be as fast as possible. The config time measured with lazy.nvim is ~0.2ms with the default configuration. Each render cycle takes only about 4-10ms.
 
 ## Usage
 

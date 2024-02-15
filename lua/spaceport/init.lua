@@ -91,9 +91,11 @@ function M.log(msg)
     local logFile = vim.fn.fnamemodify(opts.logPath, ":p") or ""
     local file = io.open(logFile, "a")
     if file == nil then
+        print("Could not open log file: " .. logFile)
         return
     end
     file:write(str .. "\n")
+    file:close()
 end
 
 ---@return number
