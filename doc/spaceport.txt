@@ -1,4 +1,4 @@
-*spaceport.txt*        For Neovim >= 0.8.0        Last change: 2024 January 31
+*spaceport.txt*        For Neovim >= 0.8.0       Last change: 2024 February 15
 
 ==============================================================================
 Table of Contents                                *spaceport-table-of-contents*
@@ -121,7 +121,7 @@ PERFORMANCE                             *spaceport-spaceport.nvim-performance*
 
 Spaceport is designed to be as fast as possible. The config time measured with
 lazy.nvim is ~0.2ms with the default configuration. Each render cycle takes
-only about 20-40ms.
+only about 4-10ms.
 
 
 USAGE                                         *spaceport-spaceport.nvim-usage*
