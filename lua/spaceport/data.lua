@@ -381,6 +381,13 @@ end
 
 ---@param dir SpaceportDir
 function M.cd(dir)
+    if rawData[dir.dir] == nil then
+        rawData[dir.dir] = {
+            time = require("spaceport.utils").getSeconds(),
+            isDir = dir.isDir,
+            pinNumber = 0,
+        }
+    end
     rawData[dir.dir].time = require("spaceport.utils").getSeconds()
     M.writeData(rawData)
     local screens = require("spaceport.screen").getActualScreens()

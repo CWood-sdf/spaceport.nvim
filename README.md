@@ -92,7 +92,11 @@ Spaceport automatically loads after neovim has started, there is no need to run 
 
 All the remaps are visible at the top of the screen with the default configuration. Any remap that deals with a project can either be used while hovering over the project or by prefixing the command with the project's number. For example, if I have a project with the number 1, I can type `1p` to open that project, or I can move the cursor to hover over the project and press `p`.
 
-Spaceport starts out without any history of your favorite directories, so when you're starting out, you will need to do the pattern of cd'ing to a directory and then doing `nvim .` to get it to show up in the recents section. Once you have a few directories in the recents section, you can start tagging them so that you can quickly jump to them.
+When you are first starting out with spaceport, it has no history of which directories you have opened, there are 3 methods to add directories to the recents section:
+
+1. Open a directory by cd'ing to it and then running `nvim .` in your terminal
+2. Use telescope and run `require('telescope').extensions.spaceport.find()`, this will allow you to fuzzy find all subdirectories of the current directory and open them (using the linux `find` command)
+3. Run `:Spaceport importOldfiles` to import the files from `vim.v.oldfiles`, this option is not recommended because it will import files, not directories, and it will not import the time data, so all the files will be marked as being opened today
 
 This is what spaceport looks like when projects are tagged.
 
@@ -231,6 +235,12 @@ Or you can search for a specific tmux window or session name:
 require('telecope').extensions.spaceport.tmux_windows()
 
 require('telecope').extensions.spaceport.tmux_sessions()
+```
+
+Or you can search for a directory that is not yet registered in spaceport:
+
+```lua
+require('telescope').extensions.spaceport.find()
 ```
 
 ## Events
