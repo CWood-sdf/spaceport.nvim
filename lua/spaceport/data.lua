@@ -82,25 +82,34 @@ function M.importOldfiles(count)
 end
 
 ---@param d SpaceportRawData
----@return SpaceportRawData
+---@return SpaceportRawData, boolean
 local function sanitizeJsonData(d)
     local ret = {}
+    local changed = false
     for k, v in pairs(d) do
         if v.pinNumber == nil then
             v.pinNumber = 0
+            changed = true
         end
         if v.time == nil then
             log("No time for " .. k .. " setting to current time")
             v.time = require("spaceport.utils").getSeconds()
+            changed = true
         end
         if v.isDir == nil then
             log("No isDir for " .. k .. " setting to false")
-            v.isDir = false
+            v.isDir = M.isdir(k)
+            changed = true
+        end
+        if v.isDir ~= M.isdir(k) then
+            log("isDir for " .. k .. " is not the same as the actual directory")
+            v.isDir = M.isdir(k)
+            changed = true
         end
 
         ret[k] = v
     end
-    return ret
+    return ret, changed
 end
 
 
@@ -132,11 +141,15 @@ function M.readData()
         end
     end
     local ret = vim.json.decode(fileContents, { object = true, array = true })
-    ret = sanitizeJsonData(ret)
     if ret == nil then
         log("Error getting spaceport data")
         print("Error getting spaceport data")
         return {}
+    end
+    local changed
+    ret, changed = sanitizeJsonData(ret)
+    if changed then
+        M.writeData(ret)
     end
     return ret
 end
@@ -427,14 +440,13 @@ function M.cd(dir)
                 require("spaceport.screen").render()
             end
             return
-        else
-            for _, screen in pairs(screens) do
-                if screen.onExit ~= nil then
-                    screen.onExit()
-                end
-            end
-            vim.cmd("edit " .. dir.dir)
         end
+        for _, screen in pairs(screens) do
+            if screen.onExit ~= nil then
+                screen.onExit()
+            end
+        end
+        vim.cmd("edit " .. dir.dir)
     end
 
     currentDir = dir
