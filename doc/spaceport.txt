@@ -1,4 +1,4 @@
-*spaceport.txt*        For Neovim >= 0.8.0       Last change: 2024 February 23
+*spaceport.txt*        For Neovim >= 0.8.0       Last change: 2024 February 26
 
 ==============================================================================
 Table of Contents                                *spaceport-table-of-contents*
@@ -105,6 +105,11 @@ The default options are:
             "recents",
         },
     
+        -- For true speed, it has the type string[][],
+        --  each element of the shortcuts array contains two strings, the first is the key, the second is a match string to a directory
+        --   for example, I have ~/.config/nvim as shortcut f, so I can type `f` to go to my neovim dotfiles, this is set with { { "f", ".config/nvim" } }
+        shortcuts = {},
+    
         --- Set to true to have more verbose logging
         debug = false,
     
@@ -115,6 +120,15 @@ The default options are:
     
     }
 <
+
+
+EXPLANATION OF (SOME OF) THE OPTIONS ~
+
+- replaceDirs: Sometimes the same directory appears a lot in the recents section, this makes it harder to read the screen because a lot of the letters are repeated. This option makes it so that the same directory is not repeated a lot, which makes it _much much_ easier to find a project
+- replaceHome: This option is just a more specific version of replaceDirs, it makes it so that the home directory is replaced with `~`
+- lastViewTime: This option makes it so that there are not a lot of directories on the screen (which can look kind of ugly). There is also a functional purpose for this, if a directory is number 50, it would be faster to find it by using telescope than by scrolling through the list
+- maxRecentFiles: This option is just a different version of lastViewTime
+- shortcuts: This option is to enable true speed (AKA get to your project before spaceport can even render speed). For some directories, even typing `1p` is too slow, sometimes I just want to instantly be at a directory. This option is a 2d array, but the important thing is that the second element is a _match string_ and not an absolute directory. This makes it so that your shortcuts will work better on other computers (where your directory structure might be slightly different). I’ve seen a shortcut system in other startup plugins, but it required absolute directories, which is not very portable
 
 
 PERFORMANCE                             *spaceport-spaceport.nvim-performance*
