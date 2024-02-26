@@ -10,6 +10,7 @@ local M = {}
 ---@field logPreserveHrs number
 ---@field lastViewTime "pin"|"today"|"yesterday"|"pastWeek"|"pastMonth"|"later"
 ---@field debug boolean
+---@field shortcuts string[][]
 local opts = {
     lastViewTime = "later",
     replaceDirs = {},
@@ -25,6 +26,7 @@ local opts = {
     },
     maxRecentFiles = 0,
     debug = false,
+    shortcuts = {},
 }
 
 local lastClean = 0
@@ -75,7 +77,9 @@ function M.setup(_opts)
     end
     opts.logPath = vim.fn.fnamemodify(opts.logPath, ":p") or ""
     require("spaceport.setup_auto")
-    cleanLog()
+    vim.schedule(function()
+        cleanLog()
+    end)
 end
 
 ---@param msg string
@@ -167,7 +171,9 @@ end
 
 function M._projectEntryCommand()
     if type(opts.projectEntry) == "string" then
-        vim.cmd(opts.projectEntry)
+        local cmd = opts.projectEntry
+        ---@cast cmd string
+        vim.cmd(cmd)
     elseif type(opts.projectEntry) == "function" then
         opts.projectEntry()
     end

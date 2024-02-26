@@ -370,6 +370,43 @@ local function setRemaps(viewport, screens)
         end
         -- startLine = startLine + v.topBuffer + (v.title ~= nil and 1 or 0) + #lines
     end
+    for _, v in ipairs(require('spaceport').getConfig().shortcuts) do
+        -- print("Setting shortcut " .. v .. " to index " .. i)
+        if type(v) ~= "table" then
+            log("Invalid shortcut: " .. vim.inspect(v) .. " expected string[2]")
+            goto continue
+        end
+        if type(v[1]) ~= "string" then
+            log("Invalid shortcut: " .. vim.inspect(v) .. " expected string[2]")
+            return
+        end
+        if type(v[2]) ~= "string" then
+            log("Invalid shortcut: " .. vim.inspect(v) .. " expected string[2]")
+            return
+        end
+        -- Basically, if its a table, then first key is key, second is a match to a directory
+        vim.keymap.set("n", v[1], function()
+            local pinned = require("spaceport.data").getPinnedData()
+            for _, dir in ipairs(pinned) do
+                if string.match(dir.dir, v[2]) then
+                    require('spaceport.data').cd(dir)
+                    return
+                end
+            end
+            local mru = require("spaceport.data").getMruData()
+            for _, dir in ipairs(mru) do
+                if string.match(dir.dir, v[2]) then
+                    require('spaceport.data').cd(dir)
+                    return
+                end
+            end
+        end, {
+            desc = "Spaceport shortcut to " .. v[2],
+            silent = true,
+            buffer = true,
+        })
+        ::continue::
+    end
 end
 
 

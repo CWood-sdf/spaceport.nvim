@@ -15,7 +15,7 @@ vim.fn.jobstart("curl https://hacker-news.firebaseio.com/v0/topstories.json -s",
         --     print(data[1])
         --     return
         -- end
-        data = vim.json.decode(data[1])
+        data = vim.json.decode(data[1]) or {}
         -- print(data)
         for i = 1, 5 do
             topStories[i] = { title = "Loading..." }
@@ -58,6 +58,8 @@ return {
                     if topStory then
                         print(topStory.url)
                     end
+                elseif topStories[count] == nil then
+                    print("Error getting story number " .. count)
                 else
                     print(topStories[count].url)
                 end
