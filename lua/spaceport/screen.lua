@@ -26,6 +26,7 @@ local SpaceportRemap = {}
 local SpaceportScreen = {}
 
 local M = {}
+local winid = 0
 
 local log = require("spaceport").log
 
@@ -565,7 +566,7 @@ local function higlightBuffer(gridLines)
     end
     hlId = 0
     hlNs = vim.api.nvim_create_namespace("Spaceport")
-    vim.api.nvim_win_set_hl_ns(1000, hlNs)
+    vim.api.nvim_win_set_hl_ns(winid, hlNs)
     if buf == nil or not vim.api.nvim_buf_is_valid(buf) then
         error("Unreachable (buf is invalid in higlightBuffer)")
     end
@@ -637,8 +638,8 @@ function M.render()
         startTime = vim.loop.hrtime()
     end
 
-    width = vim.api.nvim_win_get_width(1000)
-    height = vim.api.nvim_win_get_height(1000)
+    width = vim.api.nvim_win_get_width(winid)
+    height = vim.api.nvim_win_get_height(winid)
     if require('spaceport').getConfig().debug then
         log("Width took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
         startTime = vim.loop.hrtime()
@@ -664,7 +665,7 @@ function M.render()
         vim.api.nvim_set_option_value("swapfile", false, {
             buf = buf,
         })
-        vim.api.nvim_win_set_buf(1000, buf)
+        vim.api.nvim_win_set_buf(winid, buf)
         needsRemap = true
     end
     vim.cmd("setlocal norelativenumber nonumber")
