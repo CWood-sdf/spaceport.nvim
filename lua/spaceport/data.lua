@@ -1,7 +1,7 @@
 local spaceport = require("spaceport")
 local M = {}
-local dataPath = vim.fn.stdpath("data")
-local dataDir = dataPath .. "/spaceport.json"
+local dataDir = vim.fn.stdpath("data")
+local dataPath = dataDir .. "/spaceport.json"
 local log = spaceport.log
 
 ---@class (exact) SpaceportDir
@@ -115,18 +115,18 @@ end
 
 ---@return SpaceportRawData
 function M.readData()
-    if not M.exists(dataDir) then
-        local file = io.open(dataDir, "w")
+    if not M.exists(dataPath) then
+        local file = io.open(dataPath, "w")
         if file == nil then
-            log("Can not create file at " .. dataDir .. "")
-            print("Can not create file at " .. dataDir .. "")
+            log("Can not create file at " .. dataPath .. "")
+            print("Can not create file at " .. dataPath .. "")
             return {}
         end
         file:write(vim.json.encode({}))
         file:close()
         return {}
     end
-    local file = io.open(dataDir, "r")
+    local file = io.open(dataPath, "r")
     if file == nil then
         return {}
     end
@@ -134,7 +134,7 @@ function M.readData()
     file:close()
     if fileContents == nil or fileContents == "" then
         fileContents = "{}"
-        file = io.open(dataDir, "w")
+        file = io.open(dataPath, "w")
         if file ~= nil then
             file:write(fileContents)
             file:close()
@@ -178,10 +178,10 @@ end
 
 ---@param d SpaceportRawData
 function M.writeData(d)
-    local file = io.open(dataDir, "w")
+    local file = io.open(dataPath, "w")
     if file == nil then
-        log("Can not create file at " .. dataDir .. "")
-        print("Can not create file at " .. dataDir .. "")
+        log("Can not create file at " .. dataPath .. "")
+        print("Can not create file at " .. dataPath .. "")
         return
     end
     file:write(vim.json.encode(d))

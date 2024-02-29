@@ -118,6 +118,7 @@ end
 
 local buf = nil
 local width = 0
+local height = 0
 local hlNs = nil
 local hlId = 0
 local isExiting = false
@@ -465,22 +466,22 @@ local function renderGrid(screen, gridLines, centerRow)
         row = screen.position.row
         col = screen.position.col
         if row < 0 then
-            row = vim.api.nvim_win_get_height(0) + row - maxHeight + 1
+            row = height + row - maxHeight + 1
         end
         if row < 0 then
             print("row < 0")
         end
-        if row + maxHeight > vim.api.nvim_win_get_height(0) then
-            row = vim.api.nvim_win_get_height(0) - maxHeight + 1
+        if row + maxHeight > height then
+            row = height - maxHeight + 1
         end
         if col < 0 then
-            col = vim.api.nvim_win_get_width(0) + col - maxWidth - 1
+            col = width + col - maxWidth - 1
         end
         if col < 0 then
             print("col < 0")
         end
-        if col + maxWidth > vim.api.nvim_win_get_width(0) then
-            col = vim.api.nvim_win_get_width(0) - maxWidth
+        if col + maxWidth > width then
+            col = width - maxWidth
         end
     else
         row = centerRow
@@ -491,7 +492,7 @@ local function renderGrid(screen, gridLines, centerRow)
     local endCol = 0
     if col == nil then
         -- col is nil when position is nil, so we have to get the startCol as half the max width from the center
-        startCol = math.floor((vim.api.nvim_win_get_width(0) - maxWidth) / 2)
+        startCol = math.floor((width - maxWidth) / 2)
         -- endCol is the last column that is rendered
         endCol = startCol + maxWidth - 1
     else
@@ -557,98 +558,17 @@ local function renderGrid(screen, gridLines, centerRow)
     }
 end
 
----@class (exact) SpaceportViewport
----@field rowStart number
----@field rowEnd number
----@field colStart number
----@field colEnd number
-
-function M.render()
-    log("spaceport.screen.render()")
-    local actualStart = vim.loop.hrtime()
-    local startTime = vim.loop.hrtime()
-    ---@type SpaceportWord[][]
-    local gridLines = {}
-    ---@type table<integer, SpaceportViewport>
-    local remapsViewport = {}
-    require("spaceport.data").refreshData()
-    if require('spaceport').getConfig().debug then
-        log("Refresh took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
-        startTime = vim.loop.hrtime()
-    end
-
+local function higlightBuffer(gridLines)
     if hlNs ~= nil then
         vim.api.nvim_buf_clear_namespace(0, hlNs, 0, -1)
         hlNs = nil
     end
     hlId = 0
     hlNs = vim.api.nvim_create_namespace("Spaceport")
-    vim.api.nvim_win_set_hl_ns(0, hlNs)
-
-    width = vim.api.nvim_win_get_width(0)
-    if require('spaceport').getConfig().debug then
-        log("Width took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
-        startTime = vim.loop.hrtime()
-    end
-
-    local screens = M.getActualScreens()
-    if require('spaceport').getConfig().debug then
-        log("Screens took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
-        startTime = vim.loop.hrtime()
-    end
+    vim.api.nvim_win_set_hl_ns(1000, hlNs)
     if buf == nil or not vim.api.nvim_buf_is_valid(buf) then
-        buf = vim.api.nvim_create_buf(false, true)
-        needsRemap = true
+        error("Unreachable (buf is invalid in higlightBuffer)")
     end
-    vim.api.nvim_set_option_value("buftype", "nofile", {
-        buf = buf,
-    })
-    vim.api.nvim_buf_set_name(buf, "spaceport")
-    vim.api.nvim_set_option_value("filetype", "spaceport", {
-        buf = buf,
-    })
-    vim.api.nvim_set_option_value("bufhidden", "wipe", {
-        buf = buf,
-    })
-    vim.api.nvim_set_option_value("swapfile", false, {
-        buf = buf,
-    })
-    vim.api.nvim_set_current_buf(buf)
-    vim.cmd("setlocal norelativenumber nonumber")
-    if require('spaceport').getConfig().debug then
-        log("Buf took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
-        startTime = vim.loop.hrtime()
-    end
-
-    -- This variable keeps track of the row that the next centered screen should start at for remaps
-    local centerRow = 0
-    for index, v in ipairs(screens) do
-        gridLines, remapsViewport[index] = renderGrid(v, gridLines, centerRow)
-        if v.position == nil then
-            centerRow = remapsViewport[index].rowEnd + 1
-        end
-    end
-    if require('spaceport').getConfig().debug then
-        log("VRender took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
-        startTime = vim.loop.hrtime()
-    end
-
-    vim.api.nvim_set_option_value("modifiable", true, {
-        buf = buf,
-    })
-    local lines2 = {}
-    for _, v in ipairs(gridLines) do
-        table.insert(lines2, M.wordArrayToString(v))
-    end
-    vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines2)
-    vim.api.nvim_set_option_value("modifiable", false, {
-        buf = buf,
-    })
-    if require('spaceport').getConfig().debug then
-        log("Set lines took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
-        startTime = vim.loop.hrtime()
-    end
-
     local row = 0
     local col = 0
     ---@type table<string, string>
@@ -694,6 +614,95 @@ function M.render()
         col = 0
         row = row + 1
     end
+end
+
+
+---@class (exact) SpaceportViewport
+---@field rowStart number
+---@field rowEnd number
+---@field colStart number
+---@field colEnd number
+
+function M.render()
+    log("spaceport.screen.render()")
+    local actualStart = vim.loop.hrtime()
+    local startTime = vim.loop.hrtime()
+    ---@type SpaceportWord[][]
+    local gridLines = {}
+    ---@type table<integer, SpaceportViewport>
+    local remapsViewport = {}
+    require("spaceport.data").refreshData()
+    if require('spaceport').getConfig().debug then
+        log("Refresh took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
+        startTime = vim.loop.hrtime()
+    end
+
+    width = vim.api.nvim_win_get_width(1000)
+    height = vim.api.nvim_win_get_height(1000)
+    if require('spaceport').getConfig().debug then
+        log("Width took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
+        startTime = vim.loop.hrtime()
+    end
+
+    local screens = M.getActualScreens()
+    if require('spaceport').getConfig().debug then
+        log("Screens took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
+        startTime = vim.loop.hrtime()
+    end
+    if buf == nil or not vim.api.nvim_buf_is_valid(buf) then
+        buf = vim.api.nvim_create_buf(false, true)
+        vim.api.nvim_set_option_value("buftype", "nofile", {
+            buf = buf,
+        })
+        vim.api.nvim_buf_set_name(buf, "spaceport")
+        vim.api.nvim_set_option_value("filetype", "spaceport", {
+            buf = buf,
+        })
+        vim.api.nvim_set_option_value("bufhidden", "wipe", {
+            buf = buf,
+        })
+        vim.api.nvim_set_option_value("swapfile", false, {
+            buf = buf,
+        })
+        vim.api.nvim_win_set_buf(1000, buf)
+        needsRemap = true
+    end
+    vim.cmd("setlocal norelativenumber nonumber")
+    if require('spaceport').getConfig().debug then
+        log("Buf took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
+        startTime = vim.loop.hrtime()
+    end
+
+    -- This variable keeps track of the row that the next centered screen should start at for remaps
+    local centerRow = 0
+    for index, v in ipairs(screens) do
+        gridLines, remapsViewport[index] = renderGrid(v, gridLines, centerRow)
+        if v.position == nil then
+            centerRow = remapsViewport[index].rowEnd + 1
+        end
+    end
+    if require('spaceport').getConfig().debug then
+        log("VRender took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
+        startTime = vim.loop.hrtime()
+    end
+
+    vim.api.nvim_set_option_value("modifiable", true, {
+        buf = buf,
+    })
+    local lines2 = {}
+    for _, v in ipairs(gridLines) do
+        table.insert(lines2, M.wordArrayToString(v))
+    end
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines2)
+    vim.api.nvim_set_option_value("modifiable", false, {
+        buf = buf,
+    })
+    if require('spaceport').getConfig().debug then
+        log("Set lines took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
+        startTime = vim.loop.hrtime()
+    end
+
+    higlightBuffer(gridLines)
     if require('spaceport').getConfig().debug then
         log("Highlights took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
         startTime = vim.loop.hrtime()
