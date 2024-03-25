@@ -1,4 +1,4 @@
-*spaceport.txt*        For Neovim >= 0.8.0       Last change: 2024 February 29
+*spaceport.txt*         For Neovim >= 0.8.0         Last change: 2024 March 25
 
 ==============================================================================
 Table of Contents                                *spaceport-table-of-contents*
@@ -16,6 +16,7 @@ Table of Contents                                *spaceport-table-of-contents*
   - Events                                   |spaceport-spaceport.nvim-events|
   - Spaceport Buffer Name     |spaceport-spaceport.nvim-spaceport-buffer-name|
   - Importing vim.v.oldfiles|spaceport-spaceport.nvim-importing-vim.v.oldfiles|
+  - Contributing                       |spaceport-spaceport.nvim-contributing|
 
 ==============================================================================
 1. Spaceport.nvim                                   *spaceport-spaceport.nvim*
@@ -348,6 +349,11 @@ used files, rather than your directories. To import this data, just call
 `:Spaceport importOldfiles` and pass the number of files you want to import as
 an argument. Spaceport will add them to the database as being opened today
 because `vim.v.oldfiles` does not provide time data.
+
+
+CONTRIBUTING                           *spaceport-spaceport.nvim-contributing*
+
+Before contributing, please read the ARCHITECTURE.md file
 
 ==============================================================================
 2. Links                                                     *spaceport-links*
