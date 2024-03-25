@@ -415,7 +415,7 @@ end
 ---@param screen SpaceportScreen
 ---@param gridLines SpaceportWord[][]
 ---@param centerRow number
----@return SpaceportWord[][],  SpaceportViewport
+---@return SpaceportWord[][], SpaceportViewport
 local function renderGrid(screen, gridLines, centerRow)
     --Make startCol max length, bc it will be minimized later
     local i = 0
@@ -559,6 +559,7 @@ local function renderGrid(screen, gridLines, centerRow)
     }
 end
 
+---@param gridLines SpaceportWord[][]
 local function higlightBuffer(gridLines)
     if hlNs ~= nil then
         vim.api.nvim_buf_clear_namespace(0, hlNs, 0, -1)
@@ -588,12 +589,13 @@ local function higlightBuffer(gridLines)
                         name = hlGroup,
                     })
                     local keysCount = #vim.tbl_keys(word.colorOpts)
-                    local hlNotExists = vim.json.encode(hl) == "{}"
                     -- Apparently i have to use json to detect vim.empty_dict()
+                    local hlNotExists = vim.json.encode(hl) == "{}"
+                    -- If there are default highlight options, and the highlight does not exist, create it
                     if hlNotExists and keysCount > 1 then
                         local opts = vim.deepcopy(word.colorOpts)
                         opts._name = nil
-                        vim.api.nvim_set_hl(ns, hlGroup, opts)
+                        vim.api.nvim_set_hl(0, hlGroup, opts)
                         if require('spaceport').getConfig().debug then
                             log("Created global highlight group: " .. hlGroup)
                         end

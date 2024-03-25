@@ -270,3 +270,7 @@ The spaceport buffer is named `spaceport` with a filetype of `spaceport`. You ca
 ## Importing vim.v.oldfiles
 
 All other plugins use the `vim.v.oldfiles` to keep track of your most recently used files, rather than your directories. To import this data, just call `:Spaceport importOldfiles` and pass the number of files you want to import as an argument. Spaceport will add them to the database as being opened today because `vim.v.oldfiles` does not provide time data.
+
+## Contributing
+
+Before contributing, please read the ARCHITECTURE.md file
