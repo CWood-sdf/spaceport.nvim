@@ -34,26 +34,27 @@ The `SpaceportScreen` class is used to store all data on a screen in the renderi
 Two properties that need a little bit of explanation in the `SpaceportScreen` class are `position` and `onExit`. The `position` property is used to determine where to place a screen, if left nil, the screen will be centered and placed directly below the previous screen with `position` not set. However, if `position` is set, the position value is used as an offset vector from one of the corners of the screen. The diagram below shows the corner that is chosen based on the sign of the x and y values of the position vector.
 
 <!--prettier-ignore-->
-┌──────────────────────────── viewport ──────────────────────────────────────────┐
-│                       ▲                                                        │
-│                       │◄ ──── .row measures from the top if it is positive     │
-│                       │                                                        │
-│                       ▼                                                        │
-│                    ┌───────────────────────────────┐                           │
-│                    │                               │                           │
-│ .col is from the   │                               │ .col measures from the    │
-│ left if it's pos   │                               │  right if it is negative  │
-│       │            │             screen            │                 │         │
-│       ▼            │                               │                 ▼         │
-│◄ ──────────────── ►│                               │◄ ────────────────────── ► │
-│                    │                               │                           │
-│                    │                               │                           │
-│                    └───────────────────────────────┘                           │
-│                      ▲                                                         │
-│                      │◄ ─── .row measures from the bottom if it is negative    │
-│                      │                                                         │
-│                      ▼                                                         │
-└────────────────────────────────────────────────────────────────────────────────┘
+(please use the view raw button to see the diagram properly if you are using GitHub)
+┌──────────────────────────── viewport ───────────────────────────────────────────────┐
+│                       ▲                                                             │
+│                       │◄ ───────── .row measures from the top if it is positive     │
+│                       │                                                             │
+│                       ▼                                                             │
+│                    ┌────────────────────────────────────┐                           │
+│                    │                                    │                           │
+│ .col is from the   │                                    │ .col measures from the    │
+│ left if it's pos   │                                    │  right if it is negative  │
+│       │            │             screen                 │                 │         │
+│       ▼            │                                    │                 ▼         │
+│◄ ──────────────── ►│                                    │◄ ────────────────────── ► │
+│                    │                                    │                           │
+│                    │                                    │                           │
+│                    └────────────────────────────────────┘                           │
+│                      ▲                                                              │
+│                      │◄ ──────── .row measures from the bottom if it is negative    │
+│                      │                                                              │
+│                      ▼                                                              │
+└─────────────────────────────────────────────────────────────────────────────────────┘
 
 <!--prettier-ignore-->
 ### Functions
