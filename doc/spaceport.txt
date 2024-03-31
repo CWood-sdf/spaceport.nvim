@@ -1,4 +1,4 @@
-*spaceport.txt*         For Neovim >= 0.8.0         Last change: 2024 March 25
+*spaceport.txt*         For Neovim >= 0.8.0         Last change: 2024 March 31
 
 ==============================================================================
 Table of Contents                                *spaceport-table-of-contents*
@@ -17,6 +17,7 @@ Table of Contents                                *spaceport-table-of-contents*
   - Spaceport Buffer Name     |spaceport-spaceport.nvim-spaceport-buffer-name|
   - Importing vim.v.oldfiles|spaceport-spaceport.nvim-importing-vim.v.oldfiles|
   - Contributing                       |spaceport-spaceport.nvim-contributing|
+2. Links                                                     |spaceport-links|
 
 ==============================================================================
 1. Spaceport.nvim                                   *spaceport-spaceport.nvim*
