@@ -595,6 +595,9 @@ local function higlightBuffer(gridLines)
                     if hlNotExists and keysCount > 1 then
                         local opts = vim.deepcopy(word.colorOpts)
                         opts._name = nil
+                        if opts == nil then
+                            error("Unreachable [highlightBuffer colorOpts is nil]")
+                        end
                         vim.api.nvim_set_hl(0, hlGroup, opts)
                         if require('spaceport').getConfig().debug then
                             log("Created global highlight group: " .. hlGroup)
@@ -620,6 +623,17 @@ local function higlightBuffer(gridLines)
 end
 
 
+---@param win integer
+---@return boolean
+function M.isMainWin(win)
+    local pos = vim.api.nvim_win_get_position(win)
+    --- basically if the window is offset some amount, then it's not a main window
+    if pos[1] ~= 0 and pos[2] ~= 0 then
+        return false
+    end
+    return true
+end
+
 ---@class (exact) SpaceportViewport
 ---@field rowStart number
 ---@field rowEnd number
@@ -637,13 +651,6 @@ function M.render()
     require("spaceport.data").refreshData()
     if require('spaceport').getConfig().debug then
         log("Refresh took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
-        startTime = vim.loop.hrtime()
-    end
-
-    width = vim.api.nvim_win_get_width(winid)
-    height = vim.api.nvim_win_get_height(winid)
-    if require('spaceport').getConfig().debug then
-        log("Width took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
         startTime = vim.loop.hrtime()
     end
 
@@ -667,9 +674,37 @@ function M.render()
         vim.api.nvim_set_option_value("swapfile", false, {
             buf = buf,
         })
-        vim.api.nvim_win_set_buf(winid, buf)
+        winid = vim.api.nvim_get_current_win()
+        local wins = vim.api.nvim_list_wins()
+        local i = 1
+        while not M.isMainWin(winid) do
+            local v = wins[i]
+            if M.isMainWin(v) then
+                winid = v
+                break
+            end
+            i = i + 1
+            if i > #wins then
+                break
+            end
+        end
         needsRemap = true
+        vim.api.nvim_win_set_buf(winid, buf)
     end
+    if not vim.api.nvim_win_is_valid(winid) then
+        winid = vim.api.nvim_get_current_win()
+        if not M.isMainWin(winid) then
+            local wins = vim.api.nvim_list_wins()
+            for _, v in ipairs(wins) do
+                if M.isMainWin(v) then
+                    winid = v
+                    break
+                end
+            end
+        end
+    end
+    width = vim.api.nvim_win_get_width(winid)
+    height = vim.api.nvim_win_get_height(winid)
     vim.cmd("setlocal norelativenumber nonumber")
     if require('spaceport').getConfig().debug then
         log("Buf took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
