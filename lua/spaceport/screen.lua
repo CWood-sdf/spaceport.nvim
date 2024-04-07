@@ -405,7 +405,7 @@ local function setRemaps(viewport, screens)
         end, {
             desc = "Spaceport shortcut to " .. v[2],
             silent = true,
-            buffer = true,
+            buffer = buf,
         })
         ::continue::
     end
