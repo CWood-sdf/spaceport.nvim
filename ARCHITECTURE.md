@@ -33,8 +33,7 @@ The `SpaceportScreen` class is used to store all data on a screen in the renderi
 
 Two properties that need a little bit of explanation in the `SpaceportScreen` class are `position` and `onExit`. The `position` property is used to determine where to place a screen, if left nil, the screen will be centered and placed directly below the previous screen with `position` not set. However, if `position` is set, the position value is used as an offset vector from one of the corners of the screen. The diagram below shows the corner that is chosen based on the sign of the x and y values of the position vector.
 
-<!--prettier-ignore-->
-(please use the view raw button to see the diagram properly if you are using GitHub)
+```
 ┌──────────────────────────── viewport ───────────────────────────────────────────────┐
 │                       ▲                                                             │
 │                       │◄ ───────── .row measures from the top if it is positive     │
@@ -56,7 +55,8 @@ Two properties that need a little bit of explanation in the `SpaceportScreen` cl
 │                      ▼                                                              │
 └─────────────────────────────────────────────────────────────────────────────────────┘
 
-<!--prettier-ignore-->
+```
+
 ### Functions
 
 The first ~330 Lines of the `screen.lua` file are helper functions that are used for rendering or sanitizing the screens. About 113 of the 330 lines are helper functions around the SpaceportWord class for centering words, splitting words, and converting words to string and vice versa.

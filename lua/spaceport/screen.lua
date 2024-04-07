@@ -361,12 +361,12 @@ local function setRemaps(viewport, screens)
                     end
                 end, {
                     silent = true,
-                    buffer = true,
+                    buffer = buf,
                 })
             else
                 vim.keymap.set(remap.mode, remap.key, remap.action, {
                     silent = true,
-                    buffer = true,
+                    buffer = buf,
                 })
             end
         end
