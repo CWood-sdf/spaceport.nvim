@@ -258,10 +258,11 @@ require('telescope').extensions.spaceport.find()
 
 ## Events
 
-Spaceport emits two events:
+Spaceport emits three events:
 
 - `SpaceportEnter`: This event is emitted when spaceport is entered
-- `SpaceportDone`: This event is emitted when the project is exited, or when neovim is started with a file or directory argument
+- `SpaceportDone`: This event is emitted when a project is entered, or when neovim is started with a file or directory argument
+- `SpaceportDonePre`: This event is emitted before a project is entered
 
 ## Spaceport Buffer Name
 

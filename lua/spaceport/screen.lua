@@ -563,10 +563,12 @@ end
 local function higlightBuffer(gridLines)
     if hlNs ~= nil then
         vim.api.nvim_buf_clear_namespace(0, hlNs, 0, -1)
-        hlNs = nil
+        -- hlNs = nil
     end
     hlId = 0
-    hlNs = vim.api.nvim_create_namespace("Spaceport")
+    if hlNs == nil then
+        hlNs = vim.api.nvim_create_namespace("Spaceport")
+    end
     vim.api.nvim_win_set_hl_ns(winid, hlNs)
     if buf == nil or not vim.api.nvim_buf_is_valid(buf) then
         error("Unreachable (buf is invalid in higlightBuffer)")

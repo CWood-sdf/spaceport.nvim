@@ -157,6 +157,10 @@ end
 ---@param dir string
 function M.setCurrentDir(dir)
     -- M.refreshData()
+    vim.api.nvim_exec_autocmds("User", {
+        pattern = "SpaceportDonePre",
+        data = currentDir,
+    })
     local d = M.getAllData()
     local found = false
     for _, v in pairs(d) do
@@ -419,6 +423,10 @@ function M.cd(dir)
             end
             return
         end
+        vim.api.nvim_exec_autocmds("User", {
+            pattern = "SpaceportDonePre",
+            data = currentDir,
+        })
 
         for _, screen in pairs(screens) do
             if screen.onExit ~= nil then
@@ -441,6 +449,10 @@ function M.cd(dir)
             end
             return
         end
+        vim.api.nvim_exec_autocmds("User", {
+            pattern = "SpaceportDonePre",
+            data = currentDir,
+        })
         for _, screen in pairs(screens) do
             if screen.onExit ~= nil then
                 screen.onExit()
