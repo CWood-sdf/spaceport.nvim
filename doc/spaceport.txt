@@ -1,4 +1,4 @@
-*spaceport.txt*         For Neovim >= 0.8.0         Last change: 2024 April 07
+*spaceport.txt*          For Neovim >= 0.8.0          Last change: 2024 May 15
 
 ==============================================================================
 Table of Contents                                *spaceport-table-of-contents*
@@ -331,10 +331,11 @@ Or you can search for a directory that is not yet registered in spaceport:
 
 EVENTS                                       *spaceport-spaceport.nvim-events*
 
-Spaceport emits two events:
+Spaceport emits three events:
 
 - `SpaceportEnter`This event is emitted when spaceport is entered
-- `SpaceportDone`This event is emitted when the project is exited, or when neovim is started with a file or directory argument
+- `SpaceportDone`This event is emitted when a project is entered, or when neovim is started with a file or directory argument
+- `SpaceportDonePre`This event is emitted before a project is entered
 
 
 SPACEPORT BUFFER NAME         *spaceport-spaceport.nvim-spaceport-buffer-name*
