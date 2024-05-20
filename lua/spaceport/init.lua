@@ -149,7 +149,7 @@ end
 ---@param path string
 function M._fixDir(path)
     ---@type string
-    local ret = M._swapHomeWithTilde(path)
+    local ret = M._swapHomeWithTilde(path .. "")
     for _, dir in pairs(opts.replaceDirs) do
         local ok = type(dir) == "table"
         if ok then
@@ -161,7 +161,7 @@ function M._fixDir(path)
             ret = ret:gsub(dir, "")
         end
     end
-    return path
+    return ret
 end
 
 ---@return (string | fun(): SpaceportConfig | SpaceportConfig )[]

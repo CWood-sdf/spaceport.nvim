@@ -200,6 +200,7 @@ function M.refreshData()
     if rawData == nil then
         return
     end
+    vim.notify("asdf")
     for k, v in pairs(rawData) do
         local insert = {
             dir = k,
@@ -207,8 +208,8 @@ function M.refreshData()
             isDir = v.isDir,
             pinNumber = v.pinNumber,
             prettyDir = spaceport._fixDir(k),
-            tmuxWindowName = v.tmuxWindowName or "",
-            tmuxSessionName = v.tmuxSessionName or "",
+            tmuxWindowName = v.tmuxWindowName,
+            tmuxSessionName = v.tmuxSessionName,
         }
         if insert.pinNumber == 0 then
             table.insert(data, insert)
