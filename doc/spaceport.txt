@@ -1,4 +1,4 @@
-*spaceport.txt*          For Neovim >= 0.8.0          Last change: 2024 May 15
+*spaceport.txt*          For Neovim >= 0.8.0          Last change: 2024 May 20
 
 ==============================================================================
 Table of Contents                                *spaceport-table-of-contents*
