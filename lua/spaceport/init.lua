@@ -32,21 +32,21 @@ local opts = {
 local lastClean = 0
 
 local function cleanLog()
-    -- local logFile = opts.logPath
-    -- if not require("spaceport.data").exists(logFile) then
-    --     vim.fn.writefile({ "" }, logFile)
-    -- end
-    -- local log = vim.fn.readfile(logFile)
-    -- for i = 1, #log do
-    --     local num = vim.fn.strptime("%Y-%m-%d~%H:%M:%S", vim.fn.split(log[i], " ")[1])
-    --     if not num then
-    --         table.remove(log, i)
-    --     elseif num < vim.fn.localtime() - opts.logPreserveHrs * 60 then
-    --         table.remove(log, i)
-    --     end
-    -- end
-    -- vim.fn.writefile(log, logFile)
-    -- lastClean = vim.loop.hrtime()
+    local logFile = opts.logPath
+    if not require("spaceport.data").exists(logFile) then
+        vim.fn.writefile({ "" }, logFile)
+    end
+    local log = vim.fn.readfile(logFile)
+    for i = 1, #log do
+        local num = vim.fn.strptime("%Y-%m-%d~%H:%M:%S", vim.fn.split(log[i], " ")[1])
+        if not num then
+            table.remove(log, i)
+        elseif num < vim.fn.localtime() - opts.logPreserveHrs * 60 then
+            table.remove(log, i)
+        end
+    end
+    vim.fn.writefile(log, logFile)
+    lastClean = vim.loop.hrtime()
 end
 
 local startupStart = 0
@@ -84,22 +84,22 @@ end
 
 ---@param msg string
 function M.log(msg)
-    -- if msg == nil then
-    --     return
-    -- end
-    -- -- Clean every hour
-    -- if (vim.loop.hrtime() - lastClean) / 1e9 > 60 * 60 then
-    --     cleanLog()
-    -- end
-    -- local str = vim.fn.strftime("%Y-%m-%d~%H:%M:%S") .. " " .. msg
-    -- local logFile = vim.fn.fnamemodify(opts.logPath, ":p") or ""
-    -- local file = io.open(logFile, "a")
-    -- if file == nil then
-    --     print("Could not open log file: " .. logFile)
-    --     return
-    -- end
-    -- file:write(str .. "\n")
-    -- file:close()
+    if msg == nil then
+        return
+    end
+    -- Clean every hour
+    if (vim.loop.hrtime() - lastClean) / 1e9 > 60 * 60 then
+        cleanLog()
+    end
+    local str = vim.fn.strftime("%Y-%m-%d~%H:%M:%S") .. " " .. msg
+    local logFile = vim.fn.fnamemodify(opts.logPath, ":p") or ""
+    local file = io.open(logFile, "a")
+    if file == nil then
+        print("Could not open log file: " .. logFile)
+        return
+    end
+    file:write(str .. "\n")
+    file:close()
 end
 
 ---@return number
@@ -161,7 +161,7 @@ function M._fixDir(path)
             ret = ret:gsub(dir, "")
         end
     end
-    return ret
+    return path
 end
 
 ---@return (string | fun(): SpaceportConfig | SpaceportConfig )[]

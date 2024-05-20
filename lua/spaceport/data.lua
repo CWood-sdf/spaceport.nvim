@@ -118,8 +118,8 @@ function M.readData()
     if not M.exists(dataPath) then
         local file = io.open(dataPath, "w")
         if file == nil then
+            vim.notify("Can not create file at " .. dataPath .. "")
             log("Can not create file at " .. dataPath .. "")
-            print("Can not create file at " .. dataPath .. "")
             return {}
         end
         file:write(vim.json.encode({}))
@@ -139,6 +139,7 @@ function M.readData()
             file:write(fileContents)
             file:close()
         end
+        return {}
     end
     local ret = vim.json.decode(fileContents, { object = true, array = true })
     if ret == nil then
@@ -206,10 +207,10 @@ function M.refreshData()
             isDir = v.isDir,
             pinNumber = v.pinNumber,
             prettyDir = spaceport._fixDir(k),
-            tmuxWindowName = v.tmuxWindowName,
-            tmuxSessionName = v.tmuxSessionName,
+            tmuxWindowName = v.tmuxWindowName or "",
+            tmuxSessionName = v.tmuxSessionName or "",
         }
-        if v.pinNumber == 0 then
+        if insert.pinNumber == 0 then
             table.insert(data, insert)
         else
             table.insert(pinnedData, insert)
