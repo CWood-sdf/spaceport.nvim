@@ -200,7 +200,6 @@ function M.refreshData()
     if rawData == nil then
         return
     end
-    vim.notify("asdf")
     for k, v in pairs(rawData) do
         local insert = {
             dir = k,
