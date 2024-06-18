@@ -26,28 +26,18 @@ local pinnedData = {}
 
 ---@type SpaceportRawData
 local rawData = {}
--- This is from SO, i forgot the link
+--- https://stackoverflow.com/questions/1340230/check-if-directory-exists-in-lua
 ---@param file string
 ---@return boolean
 function M.exists(file)
-    local ok, _, code = os.rename(file, file)
-    if not ok then
-        if code == 13 then
-            -- Permission denied, but it exists
-            return true
-        end
-    end
-    if ok == nil then
-        return false
-    end
-    return ok
+    return vim.fn.filereadable(file) ~= 0
 end
 
 ---@param path string
 ---@return boolean
 function M.isdir(path)
     -- "/" works on both Unix and Windows
-    return M.exists(path .. "/")
+    return vim.fn.isdirectory(path) ~= 0
 end
 
 ---@param count number|nil
