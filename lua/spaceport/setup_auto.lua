@@ -160,6 +160,20 @@ vim.api.nvim_create_autocmd({ "VimResized" }, {
         end
     end,
 })
+vim.api.nvim_create_autocmd({ "BufLeave" }, {
+    callback = function()
+        if require("spaceport.screen").isRendering() then
+            require("spaceport.screen").render()
+        end
+    end,
+})
+vim.api.nvim_create_autocmd({ "BufEnter" }, {
+    callback = function()
+        if require("spaceport.screen").isRendering() then
+            require("spaceport.screen").render()
+        end
+    end,
+})
 
 vim.api.nvim_create_autocmd({ "QuitPre", "ExitPre" }, {
     callback = function()
