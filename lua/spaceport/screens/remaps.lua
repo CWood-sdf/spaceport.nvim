@@ -1,7 +1,7 @@
 ---@return (string|SpaceportWord[])[]
 local function l()
     local sections = require("spaceport.screen").getActualScreens()
-    local lines = { { { "Remaps", colorOpts = { _name = "SpaceportRemapTitle" } } } }
+    local lines = {}
     local largestLen = 0
     for _, section in ipairs(sections) do
         local remaps = section.remaps or {}
@@ -27,7 +27,7 @@ local function l()
             ---@type SpaceportWord[]
             local words = {
                 { remap.description, colorOpts = { _name = "SpaceportRemapDescription" } },
-                { remap.key, colorOpts = { _name = "SpaceportRemapKey" } },
+                { remap.key,         colorOpts = { _name = "SpaceportRemapKey" } },
             }
             table.insert(lines, require("spaceport.screen").setWidthWords(words, largestLen))
             ::continue::
@@ -40,7 +40,7 @@ end
 local r = {
     lines = l,
     remaps = {},
-    title = nil,
+    title = { { "Remaps", colorOpts = { _name = "SpaceportRemapTitle" } } },
     topBuffer = 1,
 }
 

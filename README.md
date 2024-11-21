@@ -139,7 +139,7 @@ All the preconfigured sections are:
 
 ### Default Screen Highlight Groups
 
-If you want to change the highlighting of the recents or remaps sections, you can set any of the following highlight groups: `SpaceportRemapTitle` `SpaceportRemapDescription`, `SpaceportRemapKey`, `SpaceportRecentsTitle`, `SpaceportRecentsProject`, or `SpaceportRecentsCount`
+If you want to change the highlighting of the recents or remaps sections, you can set any of the following highlight groups: `SpaceportRemapTitle`, `SpaceportRemapDescription`, `SpaceportRemapKey`, `SpaceportRecentsTitle`, `SpaceportRecentsProject`, or `SpaceportRecentsCount`
 
 The code to do that would look like this:
 

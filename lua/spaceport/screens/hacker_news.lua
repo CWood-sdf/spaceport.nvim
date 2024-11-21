@@ -74,6 +74,6 @@ return {
         end
         return lines
     end,
-    title = "Hacker News",
+    title = { { "Hacker News" } },
     topBuffer = 0,
 }

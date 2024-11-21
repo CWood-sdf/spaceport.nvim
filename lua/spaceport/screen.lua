@@ -19,7 +19,7 @@ local SpaceportRemap = {}
 ---@class (exact) SpaceportScreen
 ---@field lines (string|SpaceportWord[])[] | (fun(): (string|SpaceportWord[])[]) | (fun(): string[]) | (fun(): SpaceportWord[][])
 ---@field remaps? SpaceportRemap[]
----@field title? string | fun(): string
+---@field title?  SpaceportWord[] | fun(): SpaceportWord[]
 ---@field topBuffer? number
 ---@field position? SpaceportScreenPosition
 ---@field onExit? fun()
@@ -431,12 +431,16 @@ local function renderGrid(screen, gridLines, centerRow)
 
     -- render title
     if screen.title ~= nil then
-        ---@type string|fun(): string
+        ---@type (string)|(fun(): string)|(SpaceportWord[]) | fun(): SpaceportWord[]
         local title = screen.title
         if type(title) == "function" then
             title = title()
         end
-        table.insert(lines, { { title } })
+        if type(title) == "string" then
+            table.insert(lines, { { title } })
+        else
+            table.insert(lines, title)
+        end
     end
 
     --render lines
