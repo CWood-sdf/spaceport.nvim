@@ -1,7 +1,7 @@
 ---@return (string|SpaceportWord[])[]
 local function l()
     local sections = require("spaceport.screen").getActualScreens()
-    local lines = {}
+    local lines = { { { "Remaps", colorOpts = { _name = "SpaceportRemapTitle" } } } }
     local largestLen = 0
     for _, section in ipairs(sections) do
         local remaps = section.remaps or {}
@@ -41,7 +41,7 @@ end
 local r = {
     lines = l,
     remaps = {},
-    title = "Remaps",
+    title = nil,
     topBuffer = 1,
 }
 
