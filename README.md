@@ -18,6 +18,8 @@ The tag system is something I've only seen in one other startup plugin: [startup
 
 The tag system when properly used can make it so that you can get to your most used projects in less than half a second.
 
+On top of this, some projects can be bookmarked (as defined in your config), making them only one keystroke away
+
 ## Installation
 
 <details>
@@ -74,7 +76,9 @@ The default options are:
     -- For true speed, it has the type string[][],
     --  each element of the shortcuts array contains two strings, the first is the key, the second is a match string to a directory
     --   for example, I have ~/.config/nvim as shortcut f, so I can type `f` to go to my neovim dotfiles, this is set with { { "f", ".config/nvim" } }
-    shortcuts = {},
+    shortcuts = {
+        { "f", ".config/nvim" },
+    },
 
     --- Set to true to have more verbose logging
     debug = false,
@@ -93,7 +97,11 @@ The default options are:
 - replaceHome: This option is just a more specific version of replaceDirs, it makes it so that the home directory is replaced with `~`
 - lastViewTime: This option makes it so that there are not a lot of directories on the screen (which can look kind of ugly). There is also a functional purpose for this, if a directory is number 50, it would be faster to find it by using telescope than by scrolling through the list
 - maxRecentFiles: This option is just a different version of lastViewTime
-- shortcuts: This option is to enable true speed (AKA get to your project before spaceport can even render speed). For some directories, even typing `1p` is too slow, sometimes I just want to instantly be at a directory. This option is a 2d array, but the important thing is that the second element is a _match string_ and not an absolute directory. This makes it so that your shortcuts will work better on other computers (where your directory structure might be slightly different). I've seen a shortcut system in other startup plugins, but it required absolute directories, which is not very portable
+- shortcuts: This option is to enable true speed (AKA get to your project before spaceport can even render speed).
+  For some directories, even typing `1p` is too slow, sometimes I just want to instantly be at a directory.
+  This option is a 2d array, but the important thing is that the second element is a _lua match string_ and not an absolute directory.
+  This makes it so that your shortcuts will work better on other computers (where your directory structure might be slightly different).
+  I've seen a shortcut system in other startup plugins, but it required absolute directories, which is not very portable
 
 ## Performance
 
@@ -137,6 +145,49 @@ All the preconfigured sections are:
 - `name_blue_green`: This section displays the ascii art logo, but with a blue-green gradient
 - `hacker_news`: This section displays the top 5 stories on hacker news
 
+### Modifying Sections
+
+Individual section configurations can be modified by passing a table to the `sections` array with the first key of the table being a name of a section. For example, if you wanted to set the title of a section to be different:
+
+```lua
+sections = {
+    {
+        "remaps",
+        title = "REMAPS (or something)",
+    },
+
+},
+```
+
+This allows you to override every property detailed [below](https://github.com/CWood-sdf/spaceport.nvim#custom-screens) EXCEPT `lines`.
+
+Overriding remaps is a slight bit different from the rest of the properties. If you would like to override a remap, do this:
+
+```lua
+sections = {
+    {
+        "recents",
+        remaps = {
+            {
+                -- override the remap with this key
+                ogkey = "p",
+                -- change the key
+                key = "s",
+            },
+        },
+    },
+},
+
+```
+
+This selects a remap with the key of `ogkey` (for example, the key to select a project is `p`) and allows you to change any of the properties
+
+- If you would like to delete the selected remap, set `key=""`.
+- If you want to add a remap, set `ogkey=""`.
+- Note that if the remap override is set in the wrong section, spaceport will provide a warning on startup with a suggestion to change it.
+
+The fields allowed to be overriden in a remap are detailed in the class `SpaceportRemapModifier` in `lua/spaceport/init.lua`
+
 ### Default Screen Highlight Groups
 
 If you want to change the highlighting of the recents or remaps sections, you can set any of the following highlight groups: `SpaceportRemapDescription`, `SpaceportRemapKey`, `SpaceportRecentsTitle`, `SpaceportRecentsProject`, or `SpaceportRecentsCount`
@@ -155,7 +206,11 @@ If you want to have your own section, you can add a table entry to the `sections
 
 ```lua
 local i = 0
+
+---...
+sections = {
 {
+    -- can either be a string or `SpaceportWord[]`
     title = "count",
     lines = function()
         return {
@@ -187,7 +242,7 @@ local i = 0
         {
             key = "w",
             mode = "n",
-            --- Spaceport passes two parameters to action:
+            --- Spaceport passes two parameters to action():
             --- 1. The line that the cursor is on (relative to the start of the screen)
             --- 2. vim.v.count
             action = function(line, count)
@@ -213,6 +268,7 @@ local i = 0
         -- This function will be called when spaceport is exited
         i = 0
     end,
+}
 }
 ```
 
@@ -274,4 +330,4 @@ All other plugins use the `vim.v.oldfiles` to keep track of your most recently u
 
 ## Contributing
 
-Before contributing, please read the ARCHITECTURE.md file
+Before contributing, it is suggested that you read the ARCHITECTURE.md file
