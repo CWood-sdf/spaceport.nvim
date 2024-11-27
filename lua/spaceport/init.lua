@@ -191,7 +191,7 @@ function M._getIcon(icon)
     else
         local defaultIcons = { File = "", Dir = "" }
         if opts.icons then
-            if defaultIcons then return defaultIcons[icon] else return "" end
+            if defaultIcons[icon] then return defaultIcons[icon] else return "" end
         end
     end
     return ""
