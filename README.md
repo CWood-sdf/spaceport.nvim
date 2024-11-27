@@ -73,6 +73,11 @@ The default options are:
         "recents",
     },
 
+    -- toggle or set file and directory icons.
+    --  For example, `{ File = "", Dir = "" }` can be used to prefix entries with icons depending on the type
+    --  This example will be used if set to true.
+    icons = false
+
     -- For true speed, it has the type string[][],
     --  each element of the shortcuts array contains two strings, the first is the key, the second is a match string to a directory
     --   for example, I have ~/.config/nvim as shortcut f, so I can type `f` to go to my neovim dotfiles, this is set with { { "f", ".config/nvim" } }
@@ -97,6 +102,7 @@ The default options are:
 - replaceHome: This option is just a more specific version of replaceDirs, it makes it so that the home directory is replaced with `~`
 - lastViewTime: This option makes it so that there are not a lot of directories on the screen (which can look kind of ugly). There is also a functional purpose for this, if a directory is number 50, it would be faster to find it by using telescope than by scrolling through the list
 - maxRecentFiles: This option is just a different version of lastViewTime
+- icons: This option can be enabled to show file and directory icons for entries or can be set for custom icons.
 - shortcuts: This option is to enable true speed (AKA get to your project before spaceport can even render speed).
   For some directories, even typing `1p` is too slow, sometimes I just want to instantly be at a directory.
   This option is a 2d array, but the important thing is that the second element is a _lua match string_ and not an absolute directory.

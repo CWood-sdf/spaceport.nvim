@@ -41,9 +41,11 @@ local function l(config)
         }
         for _, v in ipairs(pinned) do
             linesToDir[#lines + 1] = i
+            local prefix = require("spaceport")._getIcon("File")
+            if v.isDir then prefix = require("spaceport")._getIcon("Dir") end
             ---@type SpaceportWord[]
             local words = {
-                { v.prettyDir, colorOpts = { _name = "SpaceportRecentsProject" } },
+                { prefix .. " " .. v.prettyDir, colorOpts = { _name = "SpaceportRecentsProject" } },
                 { i .. "",     colorOpts = { _name = "SpaceportRecentsCount" } },
             }
             table.insert(lines, require("spaceport.screen").setWidthWords(words, largestLen))
@@ -115,12 +117,12 @@ local function l(config)
                 }
             end
         end
-        local dir = v.prettyDir
-        local indexStr = "" .. i
         linesToDir[#lines + 1] = i
+        local prefix = require("spaceport")._getIcon("File")
+        if v.isDir then prefix = require("spaceport")._getIcon("Dir") end
         local words = {
-            { dir,      colorOpts = { _name = "SpaceportRecentsProject" } },
-            { indexStr, colorOpts = { _name = "SpaceportRecentsCount" } },
+            { prefix .. " " .. v.prettyDir, colorOpts = { _name = "SpaceportRecentsProject" } },
+            { i .. "", colorOpts = { _name = "SpaceportRecentsCount" } },
         }
         local line = require("spaceport.screen").setWidthWords(words, largestLen)
         table.insert(lines, line)

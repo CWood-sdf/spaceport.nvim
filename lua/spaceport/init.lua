@@ -17,6 +17,7 @@ local M = {}
 ---@field replaceHome boolean
 ---@field projectEntry string | fun()
 ---@field sections (string | fun(): SpaceportScreen | SpaceportScreen | SpaceportScreenConfig)[]
+---@field icons boolean | {File: string, Dir: string}
 ---@field logPath string
 ---@field maxRecentFiles number
 ---@field logPreserveHrs number
@@ -36,6 +37,7 @@ local opts = {
         "recents",
         "_global_remaps",
     },
+    icons = false,
     maxRecentFiles = 0,
     debug = false,
     shortcuts = {},
@@ -179,6 +181,20 @@ end
 ---@return (string | fun(): SpaceportScreen | SpaceportScreen | SpaceportScreenConfig )[]
 function M._getSections()
     return opts.sections
+end
+
+---@return string
+---@param icon string
+function M._getIcon(icon)
+    if type(opts.icons) == "table" then
+        if opts.icons[icon] then return opts.icons[icon] else return "" end
+    else
+        local defaultIcons = { File = "", Dir = "" }
+        if opts.icons then
+            if defaultIcons then return defaultIcons[icon] else return "" end
+        end
+    end
+    return ""
 end
 
 function M._projectEntryCommand()
