@@ -17,7 +17,8 @@ local SpaceportRemap = {}
 ---@field col number
 
 ---@class (exact) SpaceportScreen
----@field lines (string|SpaceportWord[])[] | (fun(): (string|SpaceportWord[])[]) | (fun(): string[]) | (fun(): SpaceportWord[][])
+---@field config? { [string]: any }
+---@field lines (string|SpaceportWord[])[] | (fun(config?: { [string]: any }): (string|SpaceportWord[])[]) | (fun(config?: { [string]: any }): string[]) | (fun(config?: { [string]: any }): SpaceportWord[][])
 ---@field remaps? SpaceportRemap[]
 ---@field title? string | fun(): string
 ---@field topBuffer? number
@@ -183,7 +184,7 @@ function M.getActualScreens()
     ---@type SpaceportScreen[]
     local screens = {}
     for _, screen in ipairs(configScreens) do
-        ---@type SpaceportConfig
+        ---@type SpaceportScreen
         local conf
         if type(screen) == "string" then
             -- log("screen: " .. screen)
@@ -195,7 +196,40 @@ function M.getActualScreens()
         elseif type(screen) == "function" then
             conf = screen()
         else
-            conf = screen
+            if screen[1] ~= nil and type(screen[1]) == "string" then
+                ---@type boolean, SpaceportScreen
+                local ok, s = pcall(require, "spaceport.screens." .. screen[1])
+                if not ok then
+                    log("Invalid screen (require not found): " .. screen[1])
+                end
+                conf = s
+                ---@diagnostic disable-next-line: cast-type-mismatch
+                ---@cast screen SpaceportScreenConfig
+                for k, v in pairs(screen) do
+                    if tonumber(k) ~= nil then
+                        goto continue
+                    end
+                    if k == "remaps" or k == "lines" then
+                        goto continue
+                    end
+                    conf[k] = v
+                    ::continue::
+                end
+                if screen.remaps ~= nil then
+                    for _, v in ipairs(screen.remaps) do
+                        for _, r in ipairs(conf.remaps) do
+                            if r.key == v.ogkey then
+                                for k, val in pairs(v) do
+                                    r[k] = val
+                                end
+                                break
+                            end
+                        end
+                    end
+                end
+            else
+                conf = screen
+            end
         end
         if sanitizeScreen(conf) then
             table.insert(screens, conf)
@@ -442,7 +476,7 @@ local function renderGrid(screen, gridLines, centerRow)
     --render lines
     local screenLines = screen.lines
     if type(screenLines) == "function" then
-        screenLines = screenLines()
+        screenLines = screenLines(screen.config)
         if not sanitizeLines(screenLines, false) then
             screenLines = { "Invalid screen" }
         end

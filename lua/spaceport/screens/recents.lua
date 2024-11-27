@@ -1,8 +1,9 @@
 local linesToDir = {}
 local mru
 local pinned
+---@param config { [string]: any }
 ---@return (string|SpaceportWord[])[]
-local function l()
+local function l(config)
     mru = require("spaceport.data").getMruData()
     pinned = require("spaceport.data").getPinnedData()
     if require('spaceport')._getMaxRecentFiles() ~= 0 then

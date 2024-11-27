@@ -1,10 +1,22 @@
 local M = {}
 
+---@class (exact) SpaceportRemapModifier
+---@field ogkey string
+---@field key? string
+---@field description? string
+---@field action? fun(line: number, count: number)
+---@field callOutside? boolean
+---@field visible? boolean
+
+---@class SpaceportScreenConfig : SpaceportScreen
+---@field [1] string
+---@field remaps SpaceportRemapModifier[]
+
 ---@class (exact) SpaceportConfig
 ---@field replaceDirs (string[] | string)[]
 ---@field replaceHome boolean
 ---@field projectEntry string | fun()
----@field sections (string | fun(): SpaceportConfig | SpaceportConfig)[]
+---@field sections (string | fun(): SpaceportScreen | SpaceportScreen | SpaceportScreenConfig)[]
 ---@field logPath string
 ---@field maxRecentFiles number
 ---@field logPreserveHrs number
@@ -164,7 +176,7 @@ function M._fixDir(path)
     return ret
 end
 
----@return (string | fun(): SpaceportConfig | SpaceportConfig )[]
+---@return (string | fun(): SpaceportScreen | SpaceportScreen | SpaceportScreenConfig )[]
 function M._getSections()
     return opts.sections
 end
