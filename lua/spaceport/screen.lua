@@ -17,7 +17,8 @@ local SpaceportRemap = {}
 ---@field col number
 
 ---@class (exact) SpaceportScreen
----@field lines (string|SpaceportWord[])[] | (fun(): (string|SpaceportWord[])[]) | (fun(): string[]) | (fun(): SpaceportWord[][])
+---@field config? { [string]: any }
+---@field lines (string|SpaceportWord[])[] | (fun(config?: { [string]: any }): (string|SpaceportWord[])[]) | (fun(config?: { [string]: any }): string[]) | (fun(config?: { [string]: any }): SpaceportWord[][])
 ---@field remaps? SpaceportRemap[]
 ---@field title?  SpaceportWord[] | fun(): SpaceportWord[]
 ---@field topBuffer? number
@@ -176,14 +177,21 @@ local function utf8Len(str)
     end
     return len
 end
+---@type SpaceportScreen[]?
+local screenCache = nil
 ---@return SpaceportScreen[]
 function M.getActualScreens()
+    if screenCache ~= nil then
+        return screenCache
+    end
     -- log("spaceport.screen.getActualScreens()")
     local configScreens = require("spaceport")._getSections()
     ---@type SpaceportScreen[]
     local screens = {}
+    local unfoundRemaps = {}
+    local remapKeys = {}
     for _, screen in ipairs(configScreens) do
-        ---@type SpaceportConfig
+        ---@type SpaceportScreen
         local conf
         if type(screen) == "string" then
             -- log("screen: " .. screen)
@@ -191,11 +199,63 @@ function M.getActualScreens()
             if not ok then
                 log("Invalid screen (require not found): " .. screen)
             end
+            ---@cast s SpaceportScreen
             conf = s
+            for _, v in ipairs(s.remaps or {}) do
+                remapKeys[v.key] = screen
+            end
         elseif type(screen) == "function" then
             conf = screen()
         else
-            conf = screen
+            if screen[1] ~= nil and type(screen[1]) == "string" then
+                ---@type boolean, SpaceportScreen
+                local ok, s = pcall(require, "spaceport.screens." .. screen[1])
+                if not ok then
+                    log("Invalid screen (require not found): " .. screen[1])
+                end
+                conf = s
+                ---@diagnostic disable-next-line: cast-type-mismatch
+                ---@cast screen SpaceportScreenConfig
+                for k, v in pairs(screen) do
+                    if tonumber(k) ~= nil then
+                        goto continue
+                    end
+                    if k == "remaps" or k == "lines" then
+                        goto continue
+                    end
+                    conf[k] = v
+                    ::continue::
+                end
+                for _, v in ipairs(s.remaps or {}) do
+                    remapKeys[v.key] = screen[1]
+                end
+                if screen.remaps ~= nil then
+                    for _, v in ipairs(screen.remaps) do
+                        if v.ogkey ~= nil then
+                            local found = false
+                            for i, r in ipairs(conf.remaps) do
+                                if r.key == v.ogkey then
+                                    found = true
+                                    for k, val in pairs(v) do
+                                        r[k] = val
+                                    end
+                                    if v.key == "" then
+                                        table.remove(conf.remaps, i)
+                                    end
+                                    break
+                                end
+                            end
+                            if not found then
+                                table.insert(unfoundRemaps, v.ogkey)
+                            end
+                        else
+                            table.insert(conf.remaps, v)
+                        end
+                    end
+                end
+            else
+                conf = screen
+            end
         end
         if sanitizeScreen(conf) then
             table.insert(screens, conf)
@@ -210,6 +270,18 @@ function M.getActualScreens()
             })
         end
     end
+    for _, v in ipairs(unfoundRemaps) do
+        local msg = "Could not modify remap with key '" .. v .. "'"
+        if remapKeys[v] ~= nil then
+            msg = msg .. " (Note: remap key was found in section '" .. remapKeys[v] .. "')"
+        else
+            msg = msg ..
+                " (Note: could not find any remap in a named section with that key, perhaps you meant to make a new map. If that's the case, replace `ogkey` with `key`)"
+        end
+        msg = msg .. "\n"
+        vim.notify(msg)
+    end
+    screenCache = screens
     return screens
 end
 
@@ -446,7 +518,7 @@ local function renderGrid(screen, gridLines, centerRow)
     --render lines
     local screenLines = screen.lines
     if type(screenLines) == "function" then
-        screenLines = screenLines()
+        screenLines = screenLines(screen.config)
         if not sanitizeLines(screenLines, false) then
             screenLines = { "Invalid screen" }
         end
