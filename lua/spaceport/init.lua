@@ -17,7 +17,7 @@ local M = {}
 ---@field replaceHome boolean
 ---@field projectEntry string | fun()
 ---@field sections (string | fun(): SpaceportScreen | SpaceportScreen | SpaceportScreenConfig)[]
----@field icons boolean | {File: string, Dir: string}
+---@field icons boolean | {file: string, dir: string}
 ---@field logPath string
 ---@field maxRecentFiles number
 ---@field logPreserveHrs number
@@ -186,13 +186,11 @@ end
 ---@return string
 ---@param icon string
 function M._getIcon(icon)
+    local defaultIcons = { file = "", dir = "" }
     if type(opts.icons) == "table" then
-        if opts.icons[icon] then return opts.icons[icon] else return "" end
-    else
-        local defaultIcons = { File = "", Dir = "" }
-        if opts.icons then
-            if defaultIcons[icon] then return defaultIcons[icon] else return "" end
-        end
+        return opts.icons[icon] or defaultIcons[icon] or ""
+    elseif opts.icons then
+        return defaultIcons[icon] or ""
     end
     return ""
 end

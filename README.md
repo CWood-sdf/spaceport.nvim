@@ -74,7 +74,7 @@ The default options are:
     },
 
     -- toggle or set file and directory icons.
-    --  For example, `{ File = "", Dir = "" }` can be used to prefix entries with icons depending on the type
+    --  For example, `{ file = "", dir = "" }` can be used to prefix entries with icons depending on the type
     --  This example will be used if set to true.
     icons = false
 
