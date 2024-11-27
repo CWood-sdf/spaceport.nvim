@@ -177,12 +177,19 @@ local function utf8Len(str)
     end
     return len
 end
+---@type SpaceportScreen[]?
+local screenCache = nil
 ---@return SpaceportScreen[]
 function M.getActualScreens()
+    if screenCache ~= nil then
+        return screenCache
+    end
     -- log("spaceport.screen.getActualScreens()")
     local configScreens = require("spaceport")._getSections()
     ---@type SpaceportScreen[]
     local screens = {}
+    local unfoundRemaps = {}
+    local remapKeys = {}
     for _, screen in ipairs(configScreens) do
         ---@type SpaceportScreen
         local conf
@@ -192,7 +199,11 @@ function M.getActualScreens()
             if not ok then
                 log("Invalid screen (require not found): " .. screen)
             end
+            ---@cast s SpaceportScreen
             conf = s
+            for _, v in ipairs(s.remaps or {}) do
+                remapKeys[v.key] = screen
+            end
         elseif type(screen) == "function" then
             conf = screen()
         else
@@ -215,15 +226,30 @@ function M.getActualScreens()
                     conf[k] = v
                     ::continue::
                 end
+                for _, v in ipairs(s.remaps or {}) do
+                    remapKeys[v.key] = screen[1]
+                end
                 if screen.remaps ~= nil then
                     for _, v in ipairs(screen.remaps) do
-                        for _, r in ipairs(conf.remaps) do
-                            if r.key == v.ogkey then
-                                for k, val in pairs(v) do
-                                    r[k] = val
+                        if v.ogkey ~= nil then
+                            local found = false
+                            for i, r in ipairs(conf.remaps) do
+                                if r.key == v.ogkey then
+                                    found = true
+                                    for k, val in pairs(v) do
+                                        r[k] = val
+                                    end
+                                    if v.key == "" then
+                                        table.remove(conf.remaps, i)
+                                    end
+                                    break
                                 end
-                                break
                             end
+                            if not found then
+                                table.insert(unfoundRemaps, v.ogkey)
+                            end
+                        else
+                            table.insert(conf.remaps, v)
                         end
                     end
                 end
@@ -244,6 +270,18 @@ function M.getActualScreens()
             })
         end
     end
+    for _, v in ipairs(unfoundRemaps) do
+        local msg = "Could not modify remap with key '" .. v .. "'"
+        if remapKeys[v] ~= nil then
+            msg = msg .. " (Note: remap key was found in section '" .. remapKeys[v] .. "')"
+        else
+            msg = msg ..
+                " (Note: could not find any remap in a named section with that key, perhaps you meant to make a new map. If that's the case, replace `ogkey` with `key`)"
+        end
+        msg = msg .. "\n"
+        vim.notify(msg)
+    end
+    screenCache = screens
     return screens
 end
 

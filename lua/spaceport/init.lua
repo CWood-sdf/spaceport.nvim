@@ -1,8 +1,8 @@
 local M = {}
 
 ---@class (exact) SpaceportRemapModifier
----@field ogkey string
----@field key? string
+---@field ogkey? string the key of the current remap that is being overriden
+---@field key? string set to empty string to delete remap
 ---@field description? string
 ---@field action? fun(line: number, count: number)
 ---@field callOutside? boolean
