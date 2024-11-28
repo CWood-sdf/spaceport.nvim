@@ -1,4 +1,4 @@
-*spaceport.txt*        For Neovim >= 0.8.0       Last change: 2024 November 27
+*spaceport.txt*        For Neovim >= 0.8.0       Last change: 2024 November 28
 
 ==============================================================================
 Table of Contents                                *spaceport-table-of-contents*
@@ -110,6 +110,10 @@ The default options are:
             "recents",
         },
     
+        -- toggle or set file and directory icons.
+        --  For example, the following can be used to set different icons `{ file = " ", dir = " ", remaps = " ", pinned = " ", today = " ", yesterday = " ", week = " ", month = " ", long = " ", news = "󱀄 " }`
+        icons = true
+    
         -- For true speed, it has the type string[][],
         --  each element of the shortcuts array contains two strings, the first is the key, the second is a match string to a directory
         --   for example, I have ~/.config/nvim as shortcut f, so I can type `f` to go to my neovim dotfiles, this is set with { { "f", ".config/nvim" } }
@@ -135,6 +139,7 @@ EXPLANATION OF (SOME OF) THE OPTIONS ~
 - replaceHome: This option is just a more specific version of replaceDirs, it makes it so that the home directory is replaced with `~`
 - lastViewTime: This option makes it so that there are not a lot of directories on the screen (which can look kind of ugly). There is also a functional purpose for this, if a directory is number 50, it would be faster to find it by using telescope than by scrolling through the list
 - maxRecentFiles: This option is just a different version of lastViewTime
+- icons: This option can be enabled to show file and directory icons for entries or can be set for custom icons.
 - shortcuts: This option is to enable true speed (AKA get to your project before spaceport can even render speed).
     For some directories, even typing `1p` is too slow, sometimes I just want to instantly be at a directory.
     This option is a 2d array, but the important thing is that the second element is a _lua match string_ and not an absolute directory.
@@ -193,7 +198,6 @@ All the preconfigured sections are:
 - `name`This section displays an ascii art "Spaceport" logo
 - `remaps`This section displays all the remaps that are defined as visible in all the other screens
 - `recents`This section displays the most recently used projects, as well as the pinned projects
-- `name_blue_green`This section displays the ascii art logo, but with a blue-green gradient
 - `hacker_news`This section displays the top 5 stories on hacker news
 
 
@@ -245,13 +249,85 @@ project is `p`) and allows you to change any of the properties
 The fields allowed to be overriden in a remap are detailed in the class
 `SpaceportRemapModifier` in `lua/spaceport/init.lua`
 
+Additionally, some sections accept a `config` property.
 
-DEFAULT SCREEN HIGHLIGHT GROUPS ~
+
+MODIFYING THE NAME ASCII ART ~
+
+There are three different types of name ascii art provided currently:
+
+`hash`
+
+>
+    ### ###  #  ### ### ### ### ###  ###
+    #   # # # # #   #   # # # # #  #  #
+    ### ### ### #   ##  ### # # ###   #
+      # #   # # #   #   #   # # #  #  #
+    ### #   # # ### ### #   ### #  #  #
+<
+
+`pipe`
+
+>
+    ╔═╗┌─┐┌─┐┌─┐┌─┐┌─┐┌─┐┬─┐┌┬┐
+    ╚═╗├─┘├─┤│  ├┤ ├─┘│ │├┬┘ │
+    ╚═╝┴  ┴ ┴└─┘└─┘┴  └─┘┴└─ ┴
+<
+
+and`lite`
+
+>
+     _____                       ______          _
+    /  ___|                      | ___ \        | |
+    \ `--. _ __   __ _  ___ ___  | |_/ /__  _ __| |_
+     `--. \ '_ \ / _` |/ __/ _ \ |  __/ _ \| '__| __|
+    /\__/ / |_) | (_| | (_|  __/ | | | (_) | |  | |_
+    \____/| .__/ \__,_|\___\___| \_|  \___/|_|   \__|
+          | |
+          |_|
+<
+
+thereare also two available gradient types available right now (`blue` and
+`blue_green`). the gradient and name style can be changed by modifying the
+`config` for the name screen:
+
+>lua
+    sections = {
+        {
+            "name",
+            config = {
+                style = "lite",
+                gradient = "blue_green",
+            },
+        },
+    }
+<
+
+If you want to provide your own name and gradient, you can look at the
+definition for `local gradients` and `local styles` in
+`lua/spaceport/screen/name.lua`
+
+>lua
+    sections = {
+        {
+            "name",
+            config = {
+                style = "lite",
+                gradient = {
+                    { start = "#ff0000", stop = "#990000", dir = "left" },
+                },
+            },
+        },
+    }
+<
+
+
+DEFAULTSCREEN HIGHLIGHT GROUPS ~
 
 If you want to change the highlighting of the recents or remaps sections, you
-can set any of the following highlight groups: `SpaceportRemapDescription`,
-`SpaceportRemapKey`, `SpaceportRecentsTitle`, `SpaceportRecentsProject`, or
-`SpaceportRecentsCount`
+can set any of the following highlight groups: `SpaceportRemapTitle`,
+`SpaceportRemapDescription`, `SpaceportRemapKey`, `SpaceportRecentsTitle`,
+`SpaceportRecentsProject`, or `SpaceportRecentsCount`
 
 The code to do that would look like this:
 
