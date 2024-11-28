@@ -20,7 +20,7 @@ local SpaceportRemap = {}
 ---@field config? { [string]: any }
 ---@field lines (string|SpaceportWord[])[] | (fun(config?: { [string]: any }): (string|SpaceportWord[])[]) | (fun(config?: { [string]: any }): string[]) | (fun(config?: { [string]: any }): SpaceportWord[][])
 ---@field remaps? SpaceportRemap[]
----@field title? string | fun(): string
+---@field title?  SpaceportWord[] | fun(): SpaceportWord[]
 ---@field topBuffer? number
 ---@field position? SpaceportScreenPosition
 ---@field onExit? fun()
@@ -125,7 +125,8 @@ local hlNs = nil
 local hlId = 0
 local isExiting = false
 function M.isRendering()
-    return buf ~= nil and vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_get_current_buf() == buf and not isExiting
+    return buf ~= nil and vim.api.nvim_buf_is_valid(buf) and
+    vim.api.nvim_get_current_buf() == buf and not isExiting
 end
 
 function M.exit()
@@ -142,7 +143,7 @@ end
 
 -- Returns the length in bytes of the utf8 character
 -- Copilot wrote this and it actually works :O
-local function codepointLen(utf8Char)
+function M.codepointLen(utf8Char)
     if utf8Char:byte() < 128 then
         return 1
     elseif utf8Char:byte() < 224 then
@@ -154,10 +155,9 @@ local function codepointLen(utf8Char)
     end
 end
 
-
 ---@param str string
 ---@return number
-local function utf8Len(str)
+function M.utf8Len(str)
     local len = 0
     local i = 1
     while i <= #str do
@@ -177,6 +177,7 @@ local function utf8Len(str)
     end
     return len
 end
+
 ---@type SpaceportScreen[]?
 local screenCache = nil
 ---@return SpaceportScreen[]
@@ -220,7 +221,7 @@ function M.getActualScreens()
                     if tonumber(k) ~= nil then
                         goto continue
                     end
-                    if k == "remaps" or k == "lines" then
+                    if k == "remaps" or k == "lines" or k == "config" then
                         goto continue
                     end
                     conf[k] = v
@@ -228,6 +229,12 @@ function M.getActualScreens()
                 end
                 for _, v in ipairs(s.remaps or {}) do
                     remapKeys[v.key] = screen[1]
+                end
+                if screen.config ~= nil then
+                    conf.config = conf.config or {}
+                    for k, v in pairs(screen.config) do
+                        conf.config[k] = v
+                    end
                 end
                 if screen.remaps ~= nil then
                     for _, v in ipairs(screen.remaps) do
@@ -273,7 +280,8 @@ function M.getActualScreens()
     for _, v in ipairs(unfoundRemaps) do
         local msg = "Could not modify remap with key '" .. v .. "'"
         if remapKeys[v] ~= nil then
-            msg = msg .. " (Note: remap key was found in section '" .. remapKeys[v] .. "')"
+            msg = msg ..
+            " (Note: remap key was found in section '" .. remapKeys[v] .. "')"
         else
             msg = msg ..
                 " (Note: could not find any remap in a named section with that key, perhaps you meant to make a new map. If that's the case, replace `ogkey` with `key`)"
@@ -294,7 +302,7 @@ end
 ---@param w? number
 function M.centerString(str, w)
     w = w or width
-    local len = utf8Len(str)
+    local len = M.utf8Len(str)
     local pad = math.floor((w - len) / 2)
     return string.rep(" ", pad) .. str
 end
@@ -306,7 +314,7 @@ function M.centerWords(arr, w)
     w = w or width
     local len = 0
     for _, v in pairs(arr) do
-        len = len + utf8Len(v[1])
+        len = len + M.utf8Len(v[1])
     end
     local pad = math.floor((w - len) / 2)
     ---@type SpaceportWord[]
@@ -335,7 +343,7 @@ end
 ---Concats two strings to be a certain width by inserting spaces between them
 function M.setWidth(str, w, ch)
     ch = ch or " "
-    local len = utf8Len(str[1]) + utf8Len(str[2])
+    local len = M.utf8Len(str[1]) + M.utf8Len(str[2])
     local pad = w - len
     local ret = ""
     ret = ret .. str[1] .. string.rep(ch, pad) .. str[2]
@@ -359,11 +367,11 @@ end
 ---@param line string|SpaceportWord[]
 function M.wordArrayUtf8Len(line)
     if type(line) == "string" then
-        return utf8Len(line)
+        return M.utf8Len(line)
     end
     local ret = 0
     for _, v in ipairs(line) do
-        ret = ret + utf8Len(v[1])
+        ret = ret + M.utf8Len(v[1])
     end
     return ret
 end
@@ -378,8 +386,8 @@ function M.setWidthWords(words, w, ch)
     local ret = {}
     local left = words[1]
     local right = words[2]
-    local leftLen = utf8Len(left[1])
-    local rightLen = utf8Len(right[1])
+    local leftLen = M.utf8Len(left[1])
+    local rightLen = M.utf8Len(right[1])
     local pad = w - (leftLen + rightLen)
     local spaces = string.rep(ch, pad)
     ret[1] = words[1]
@@ -417,8 +425,9 @@ local function setRemaps(viewport, screens)
             if type(remap.action) == "function" then
                 local startLineCopy = viewport[i].rowStart
                 local indexCopy = i
-                vim.keymap.set(remap.mode, remap.key, function()
-                    local line = (vim.fn.line(".") or 0) - startLineCopy - (v.topBuffer or 0) -
+                vim.keymap.set(remap.mode, remap.key, function ()
+                    local line = (vim.fn.line(".") or 0) - startLineCopy -
+                        (v.topBuffer or 0) -
                         (v.title ~= nil and 1 or 0)
                     local callOutside = remap.callOutside
                     if callOutside == nil then
@@ -444,7 +453,7 @@ local function setRemaps(viewport, screens)
         end
         -- startLine = startLine + v.topBuffer + (v.title ~= nil and 1 or 0) + #lines
     end
-    for _, v in ipairs(require('spaceport').getConfig().shortcuts) do
+    for _, v in ipairs(require("spaceport").getConfig().shortcuts) do
         -- print("Setting shortcut " .. v .. " to index " .. i)
         if type(v) ~= "table" then
             log("Invalid shortcut: " .. vim.inspect(v) .. " expected string[2]")
@@ -459,18 +468,18 @@ local function setRemaps(viewport, screens)
             return
         end
         -- Basically, if its a table, then first key is key, second is a match to a directory
-        vim.keymap.set("n", v[1], function()
+        vim.keymap.set("n", v[1], function ()
             local pinned = require("spaceport.data").getPinnedData()
             for _, dir in ipairs(pinned) do
                 if string.match(dir.dir, v[2]) then
-                    require('spaceport.data').cd(dir)
+                    require("spaceport.data").cd(dir)
                     return
                 end
             end
             local mru = require("spaceport.data").getMruData()
             for _, dir in ipairs(mru) do
                 if string.match(dir.dir, v[2]) then
-                    require('spaceport.data').cd(dir)
+                    require("spaceport.data").cd(dir)
                     return
                 end
             end
@@ -503,12 +512,16 @@ local function renderGrid(screen, gridLines, centerRow)
 
     -- render title
     if screen.title ~= nil then
-        ---@type string|fun(): string
+        ---@type (string)|(fun(): string)|(SpaceportWord[]) | fun(): SpaceportWord[]
         local title = screen.title
         if type(title) == "function" then
             title = title()
         end
-        table.insert(lines, { { title } })
+        if type(title) == "string" then
+            table.insert(lines, { { title } })
+        else
+            table.insert(lines, title)
+        end
     end
 
     --render lines
@@ -601,7 +614,7 @@ local function renderGrid(screen, gridLines, centerRow)
             local q = 1
             while q <= #w[1] do
                 -- The length of the utf8 char is determinable by the first byte
-                local len = codepointLen(w[1]:sub(q, q))
+                local len = M.codepointLen(w[1]:sub(q, q))
                 -- The actual utf8 char
                 local char = w[1]:sub(q, q + len - 1)
                 q = q + len
@@ -670,10 +683,11 @@ local function higlightBuffer(gridLines)
                         local opts = vim.deepcopy(word.colorOpts)
                         opts._name = nil
                         if opts == nil then
-                            error("Unreachable [highlightBuffer colorOpts is nil]")
+                            error(
+                            "Unreachable [highlightBuffer colorOpts is nil]")
                         end
                         vim.api.nvim_set_hl(0, hlGroup, opts)
-                        if require('spaceport').getConfig().debug then
+                        if require("spaceport").getConfig().debug then
                             log("Created global highlight group: " .. hlGroup)
                         end
                     elseif hlNotExists then
@@ -687,7 +701,8 @@ local function higlightBuffer(gridLines)
                     hlId = hlId + 1
                     usedHighlights[optsStr] = hlGroup
                 end
-                vim.api.nvim_buf_add_highlight(buf, ns, hlGroup, row, col, col + #word[1])
+                vim.api.nvim_buf_add_highlight(buf, ns, hlGroup, row, col,
+                    col + #word[1])
             end
             col = col + #word[1]
         end
@@ -723,13 +738,13 @@ function M.render()
     ---@type table<integer, SpaceportViewport>
     local remapsViewport = {}
     require("spaceport.data").refreshData()
-    if require('spaceport').getConfig().debug then
+    if require("spaceport").getConfig().debug then
         log("Refresh took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
         startTime = vim.loop.hrtime()
     end
 
     local screens = M.getActualScreens()
-    if require('spaceport').getConfig().debug then
+    if require("spaceport").getConfig().debug then
         log("Screens took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
         startTime = vim.loop.hrtime()
     end
@@ -780,7 +795,7 @@ function M.render()
     width = vim.api.nvim_win_get_width(winid)
     height = vim.api.nvim_win_get_height(winid)
     vim.cmd("setlocal norelativenumber nonumber")
-    if require('spaceport').getConfig().debug then
+    if require("spaceport").getConfig().debug then
         log("Buf took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
         startTime = vim.loop.hrtime()
     end
@@ -793,7 +808,7 @@ function M.render()
             centerRow = remapsViewport[index].rowEnd + 1
         end
     end
-    if require('spaceport').getConfig().debug then
+    if require("spaceport").getConfig().debug then
         log("VRender took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
         startTime = vim.loop.hrtime()
     end
@@ -809,13 +824,13 @@ function M.render()
     vim.api.nvim_set_option_value("modifiable", false, {
         buf = buf,
     })
-    if require('spaceport').getConfig().debug then
+    if require("spaceport").getConfig().debug then
         log("Set lines took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
         startTime = vim.loop.hrtime()
     end
 
     higlightBuffer(gridLines)
-    if require('spaceport').getConfig().debug then
+    if require("spaceport").getConfig().debug then
         log("Highlights took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
         startTime = vim.loop.hrtime()
     end
@@ -823,12 +838,12 @@ function M.render()
         setRemaps(remapsViewport, screens)
         needsRemap = false
     end
-    if require('spaceport').getConfig().debug then
+    if require("spaceport").getConfig().debug then
         log("Remaps took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
         startTime = vim.loop.hrtime()
     end
     log("Total render took " .. (vim.loop.hrtime() - actualStart) / 1e6 .. "ms")
-    if require('spaceport').getConfig().debug then
+    if require("spaceport").getConfig().debug then
         log("")
     end
 end

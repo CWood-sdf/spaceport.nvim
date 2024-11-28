@@ -15,7 +15,8 @@ end
 ---@return boolean
 ---@param time number
 function M.isYesterday(time)
-    local yesterday = vim.fn.strftime("%Y-%m-%d", vim.fn.localtime() - 24 * 60 * 60)
+    local yesterday = vim.fn.strftime("%Y-%m-%d",
+        vim.fn.localtime() - 24 * 60 * 60)
     local t = vim.fn.strftime("%Y-%m-%d", time)
     return yesterday == t
 end

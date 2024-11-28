@@ -26,11 +26,11 @@ local function l()
             end
             ---@type SpaceportWord[]
             local words = {
-                { remap.description, "SpaceportRemapDescription" },
-                { remap.key,         "SpaceportRemapKey" },
-
+                { remap.description, colorOpts = { _name = "SpaceportRemapDescription" } },
+                { remap.key,         colorOpts = { _name = "SpaceportRemapKey" } },
             }
-            table.insert(lines, require("spaceport.screen").setWidthWords(words, largestLen))
+            table.insert(lines,
+                require("spaceport.screen").setWidthWords(words, largestLen))
             ::continue::
         end
     end
@@ -41,7 +41,7 @@ end
 local r = {
     lines = l,
     remaps = {},
-    title = "Remaps",
+    title = { { require("spaceport")._getIcon("remaps") .. "Remaps", colorOpts = { _name = "SpaceportRemapTitle" } } },
     topBuffer = 1,
 }
 

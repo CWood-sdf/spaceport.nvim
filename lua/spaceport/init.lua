@@ -17,6 +17,7 @@ local M = {}
 ---@field replaceHome boolean
 ---@field projectEntry string | fun()
 ---@field sections (string | fun(): SpaceportScreen | SpaceportScreen | SpaceportScreenConfig)[]
+---@field icons boolean | { file: string, dir: string, remaps: string, pinned: string, today: string, yesterday: string, week: string, month: string, long: string, news: string }
 ---@field logPath string
 ---@field maxRecentFiles number
 ---@field logPreserveHrs number
@@ -35,8 +36,10 @@ local opts = {
         "remaps",
         "recents",
         "_global_remaps",
+        "hacker_news",
     },
-    maxRecentFiles = 0,
+    icons = true,
+    maxRecentFiles = vim.api.nvim_win_get_height(0),
     debug = false,
     shortcuts = {},
 }
@@ -50,7 +53,8 @@ local function cleanLog()
     end
     local log = vim.fn.readfile(logFile)
     for i = 1, #log do
-        local num = vim.fn.strptime("%Y-%m-%d~%H:%M:%S", vim.fn.split(log[i], " ")[1])
+        local num = vim.fn.strptime("%Y-%m-%d~%H:%M:%S",
+            vim.fn.split(log[i], " ")[1])
         if not num then
             table.remove(log, i)
         elseif num < vim.fn.localtime() - opts.logPreserveHrs * 60 then
@@ -89,7 +93,7 @@ function M.setup(_opts)
     end
     opts.logPath = vim.fn.fnamemodify(opts.logPath, ":p") or ""
     require("spaceport.setup_auto")
-    vim.schedule(function()
+    vim.schedule(function ()
         cleanLog()
     end)
 end
@@ -179,6 +183,30 @@ end
 ---@return (string | fun(): SpaceportScreen | SpaceportScreen | SpaceportScreenConfig )[]
 function M._getSections()
     return opts.sections
+end
+
+---@return string
+---@param icon string
+function M._getIcon(icon)
+    local defaultIcons = {
+        file = " ",
+        dir = " ",
+        remaps = " ",
+        pinned = " ",
+        today =
+        " ",
+        yesterday = " ",
+        week = " ",
+        month = " ",
+        long = " ",
+        news = "󱀄 "
+    }
+    if type(opts.icons) == "table" then
+        return opts.icons[icon] or defaultIcons[icon] or ""
+    elseif opts.icons then
+        return defaultIcons[icon] or ""
+    end
+    return ""
 end
 
 function M._projectEntryCommand()
