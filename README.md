@@ -74,9 +74,8 @@ The default options are:
     },
 
     -- toggle or set file and directory icons.
-    --  For example, `{ file = "", dir = "" }` can be used to prefix entries with icons depending on the type
-    --  This example will be used if set to true.
-    icons = false
+    --  For example, the following can be used to set different icons `{ file = " ", dir = " ", remaps = " ", pinned = " ", today = " ", yesterday = " ", week = " ", month = " ", long = " ", news = "󱀄 " }`
+    icons = true
 
     -- For true speed, it has the type string[][],
     --  each element of the shortcuts array contains two strings, the first is the key, the second is a match string to a directory
