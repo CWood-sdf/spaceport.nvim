@@ -40,7 +40,7 @@ end
 local r = {
     lines = l,
     remaps = {},
-    title = { { "Remaps", colorOpts = { _name = "SpaceportRemapTitle" } } },
+    title = { { require("spaceport")._getIcon("remaps") .. "Remaps", colorOpts = { _name = "SpaceportRemapTitle" } } },
     topBuffer = 1,
 }
 

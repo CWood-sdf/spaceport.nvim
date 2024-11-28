@@ -74,6 +74,6 @@ return {
         end
         return lines
     end,
-    title = { { "Hacker News" } },
+    title = { { require("spaceport")._getIcon("news") .. "Hacker News" } },
     topBuffer = 0,
 }

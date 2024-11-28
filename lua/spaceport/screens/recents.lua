@@ -37,7 +37,7 @@ local function l(config)
     if #pinned > 0 then
         lines = {
             "",
-            { { "Pinned", colorOpts = { _name = "SpaceportRecentsTitle" } } },
+            { { require("spaceport")._getIcon("pinned") .. "Pinned", colorOpts = { _name = "SpaceportRecentsTitle" } } },
         }
         for _, v in ipairs(pinned) do
             linesToDir[#lines + 1] = i
@@ -45,7 +45,7 @@ local function l(config)
             if v.isDir then prefix = require("spaceport")._getIcon("dir") end
             ---@type SpaceportWord[]
             local words = {
-                { prefix .. " " .. v.prettyDir, colorOpts = { _name = "SpaceportRecentsProject" } },
+                { prefix .. v.prettyDir, colorOpts = { _name = "SpaceportRecentsProject" } },
                 { i .. "",                      colorOpts = { _name = "SpaceportRecentsCount" } },
             }
             table.insert(lines, require("spaceport.screen").setWidthWords(words, largestLen))
@@ -63,7 +63,7 @@ local function l(config)
                 currentTime = "Today"
                 lines[#lines + 1] = ""
                 lines[#lines + 1] = {
-                    { currentTime, colorOpts = { _name = "SpaceportRecentsTitle" } },
+                    { require("spaceport")._getIcon("today") .. currentTime, colorOpts = { _name = "SpaceportRecentsTitle" } },
                 }
                 -- addLine(lines, currentTime, width)
             end
@@ -75,7 +75,7 @@ local function l(config)
                 end
                 lines[#lines + 1] = ""
                 lines[#lines + 1] = {
-                    { currentTime, colorOpts = { _name = "SpaceportRecentsTitle" } },
+                    { require("spaceport")._getIcon("yesterday") .. currentTime, colorOpts = { _name = "SpaceportRecentsTitle" } },
                 }
             end
         elseif utils.isPastWeek(v.time) then
@@ -86,7 +86,7 @@ local function l(config)
                 end
                 lines[#lines + 1] = ""
                 lines[#lines + 1] = {
-                    { currentTime, colorOpts = { _name = "SpaceportRecentsTitle" } },
+                    { require("spaceport")._getIcon("week") .. currentTime, colorOpts = { _name = "SpaceportRecentsTitle" } },
                 }
             end
         elseif utils.isPastMonth(v.time) then
@@ -97,7 +97,7 @@ local function l(config)
                 end
                 lines[#lines + 1] = ""
                 lines[#lines + 1] = {
-                    { currentTime, colorOpts = { _name = "SpaceportRecentsTitle" } },
+                    { require("spaceport")._getIcon("month") .. currentTime, colorOpts = { _name = "SpaceportRecentsTitle" } },
                 }
             end
         else
@@ -113,7 +113,7 @@ local function l(config)
                 end
                 lines[#lines + 1] = ""
                 lines[#lines + 1] = {
-                    { currentTime, colorOpts = { _name = "SpaceportRecentsTitle" } },
+                    { require("spaceport")._getIcon("long") .. currentTime, colorOpts = { _name = "SpaceportRecentsTitle" } },
                 }
             end
         end
@@ -121,7 +121,7 @@ local function l(config)
         local prefix = require("spaceport")._getIcon("file")
         if v.isDir then prefix = require("spaceport")._getIcon("dir") end
         local words = {
-            { prefix .. " " .. v.prettyDir, colorOpts = { _name = "SpaceportRecentsProject" } },
+            { prefix .. v.prettyDir, colorOpts = { _name = "SpaceportRecentsProject" } },
             { i .. "",                      colorOpts = { _name = "SpaceportRecentsCount" } },
         }
         local line = require("spaceport.screen").setWidthWords(words, largestLen)
