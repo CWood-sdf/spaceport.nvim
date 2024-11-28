@@ -148,7 +148,6 @@ All the preconfigured sections are:
 - `name`: This section displays an ascii art "Spaceport" logo
 - `remaps`: This section displays all the remaps that are defined as visible in all the other screens
 - `recents`: This section displays the most recently used projects, as well as the pinned projects
-- `name_blue_green`: This section displays the ascii art logo, but with a blue-green gradient
 - `hacker_news`: This section displays the top 5 stories on hacker news
 
 ### Modifying Sections
@@ -193,6 +192,73 @@ This selects a remap with the key of `ogkey` (for example, the key to select a p
 - Note that if the remap override is set in the wrong section, spaceport will provide a warning on startup with a suggestion to change it.
 
 The fields allowed to be overriden in a remap are detailed in the class `SpaceportRemapModifier` in `lua/spaceport/init.lua`
+
+Additionally, some sections accept a `config` property.
+
+### Modifying the name ascii art
+
+There are three different types of name ascii art provided currently:
+
+`hash`:
+
+```
+### ###  #  ### ### ### ### ###  ###
+#   # # # # #   #   # # # # #  #  #
+### ### ### #   ##  ### # # ###   #
+  # #   # # #   #   #   # # #  #  #
+### #   # # ### ### #   ### #  #  #
+```
+
+`pipe`:
+
+```
+╔═╗┌─┐┌─┐┌─┐┌─┐┌─┐┌─┐┬─┐┌┬┐
+╚═╗├─┘├─┤│  ├┤ ├─┘│ │├┬┘ │
+╚═╝┴  ┴ ┴└─┘└─┘┴  └─┘┴└─ ┴
+```
+
+and `lite`:
+
+```
+ _____                       ______          _
+/  ___|                      | ___ \        | |
+\ `--. _ __   __ _  ___ ___  | |_/ /__  _ __| |_
+ `--. \ '_ \ / _` |/ __/ _ \ |  __/ _ \| '__| __|
+/\__/ / |_) | (_| | (_|  __/ | | | (_) | |  | |_
+\____/| .__/ \__,_|\___\___| \_|  \___/|_|   \__|
+      | |
+      |_|
+```
+
+there are also two available gradient types available right now (`blue` and `blue_green`). the gradient and name style can be changed by modifying the `config` for the name screen:
+
+```lua
+sections = {
+    {
+        "name",
+        config = {
+            style = "lite",
+            gradient = "blue_green",
+        },
+    },
+}
+```
+
+If you want to provide your own name and gradient, you can look at the definition for `local gradients` and `local styles` in `lua/spaceport/screen/name.lua`:
+
+```lua
+sections = {
+    {
+        "name",
+        config = {
+            style = "lite",
+            gradient = {
+                { start = "#ff0000", stop = "#990000", dir = "left" },
+            },
+        },
+    },
+}
+```
 
 ### Default Screen Highlight Groups
 

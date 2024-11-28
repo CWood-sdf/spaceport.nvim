@@ -142,7 +142,7 @@ end
 
 -- Returns the length in bytes of the utf8 character
 -- Copilot wrote this and it actually works :O
-local function codepointLen(utf8Char)
+function M.codepointLen(utf8Char)
     if utf8Char:byte() < 128 then
         return 1
     elseif utf8Char:byte() < 224 then
@@ -154,10 +154,9 @@ local function codepointLen(utf8Char)
     end
 end
 
-
 ---@param str string
 ---@return number
-local function utf8Len(str)
+function M.utf8Len(str)
     local len = 0
     local i = 1
     while i <= #str do
@@ -177,6 +176,7 @@ local function utf8Len(str)
     end
     return len
 end
+
 ---@type SpaceportScreen[]?
 local screenCache = nil
 ---@return SpaceportScreen[]
@@ -220,7 +220,7 @@ function M.getActualScreens()
                     if tonumber(k) ~= nil then
                         goto continue
                     end
-                    if k == "remaps" or k == "lines" then
+                    if k == "remaps" or k == "lines" or k == "config" then
                         goto continue
                     end
                     conf[k] = v
@@ -228,6 +228,12 @@ function M.getActualScreens()
                 end
                 for _, v in ipairs(s.remaps or {}) do
                     remapKeys[v.key] = screen[1]
+                end
+                if screen.config ~= nil then
+                    conf.config = conf.config or {}
+                    for k, v in pairs(screen.config) do
+                        conf.config[k] = v
+                    end
                 end
                 if screen.remaps ~= nil then
                     for _, v in ipairs(screen.remaps) do
@@ -294,7 +300,7 @@ end
 ---@param w? number
 function M.centerString(str, w)
     w = w or width
-    local len = utf8Len(str)
+    local len = M.utf8Len(str)
     local pad = math.floor((w - len) / 2)
     return string.rep(" ", pad) .. str
 end
@@ -306,7 +312,7 @@ function M.centerWords(arr, w)
     w = w or width
     local len = 0
     for _, v in pairs(arr) do
-        len = len + utf8Len(v[1])
+        len = len + M.utf8Len(v[1])
     end
     local pad = math.floor((w - len) / 2)
     ---@type SpaceportWord[]
@@ -335,7 +341,7 @@ end
 ---Concats two strings to be a certain width by inserting spaces between them
 function M.setWidth(str, w, ch)
     ch = ch or " "
-    local len = utf8Len(str[1]) + utf8Len(str[2])
+    local len = M.utf8Len(str[1]) + M.utf8Len(str[2])
     local pad = w - len
     local ret = ""
     ret = ret .. str[1] .. string.rep(ch, pad) .. str[2]
@@ -359,11 +365,11 @@ end
 ---@param line string|SpaceportWord[]
 function M.wordArrayUtf8Len(line)
     if type(line) == "string" then
-        return utf8Len(line)
+        return M.utf8Len(line)
     end
     local ret = 0
     for _, v in ipairs(line) do
-        ret = ret + utf8Len(v[1])
+        ret = ret + M.utf8Len(v[1])
     end
     return ret
 end
@@ -378,8 +384,8 @@ function M.setWidthWords(words, w, ch)
     local ret = {}
     local left = words[1]
     local right = words[2]
-    local leftLen = utf8Len(left[1])
-    local rightLen = utf8Len(right[1])
+    local leftLen = M.utf8Len(left[1])
+    local rightLen = M.utf8Len(right[1])
     local pad = w - (leftLen + rightLen)
     local spaces = string.rep(ch, pad)
     ret[1] = words[1]
@@ -605,7 +611,7 @@ local function renderGrid(screen, gridLines, centerRow)
             local q = 1
             while q <= #w[1] do
                 -- The length of the utf8 char is determinable by the first byte
-                local len = codepointLen(w[1]:sub(q, q))
+                local len = M.codepointLen(w[1]:sub(q, q))
                 -- The actual utf8 char
                 local char = w[1]:sub(q, q + len - 1)
                 q = q + len
