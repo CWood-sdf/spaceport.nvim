@@ -29,7 +29,8 @@ local function l()
                 { remap.description, colorOpts = { _name = "SpaceportRemapDescription" } },
                 { remap.key,         colorOpts = { _name = "SpaceportRemapKey" } },
             }
-            table.insert(lines, require("spaceport.screen").setWidthWords(words, largestLen))
+            table.insert(lines,
+                require("spaceport.screen").setWidthWords(words, largestLen))
             ::continue::
         end
     end

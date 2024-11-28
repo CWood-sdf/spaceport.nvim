@@ -2,21 +2,21 @@ local allCmds = {
     Spaceport = {},
 }
 local cmds = {
-    renameWindow = function(args)
+    renameWindow = function (args)
         local value = args[1]
         require("spaceport.data").renameWindow(value)
     end,
-    renameSession = function(args)
+    renameSession = function (args)
         local value = args[1]
         require("spaceport.data").renameSession(value)
     end,
-    verticalSplit = function(_)
+    verticalSplit = function (_)
         require("spaceport.data").tmuxSplitWindowDown()
     end,
-    horizontalSplit = function(_)
+    horizontalSplit = function (_)
         require("spaceport.data").tmuxSplitWindowLeft()
     end,
-    importOldfiles = function(args)
+    importOldfiles = function (args)
         local countStr = args[1]
         local count = nil
         if countStr ~= nil then
@@ -31,7 +31,7 @@ local cmds = {
 for k, _ in pairs(cmds) do
     allCmds.Spaceport[k] = {}
 end
-vim.api.nvim_create_user_command("Spaceport", function(opts)
+vim.api.nvim_create_user_command("Spaceport", function (opts)
     if #opts.fargs == 0 or opts.fargs == nil then
         vim.api.nvim_exec_autocmds("User", {
             pattern = "SpaceportEnter",
@@ -58,7 +58,7 @@ vim.api.nvim_create_user_command("Spaceport", function(opts)
     end
 end, {
     nargs = "*",
-    complete = function(working, current, _)
+    complete = function (working, current, _)
         local tempCmds = allCmds
         local i = 1
         local cmdStr = ""
@@ -98,7 +98,7 @@ end, {
     end,
 })
 vim.api.nvim_create_autocmd({ "UiEnter" }, {
-    callback = function()
+    callback = function ()
         require("spaceport").__timeStartup()
 
         if vim.fn.argc() == 0 then
@@ -141,7 +141,7 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
                 break
             end
             require("spaceport.data").writeData(dataToWrite)
-            require('spaceport.data').refreshData()
+            require("spaceport.data").refreshData()
             require("spaceport.data").setCurrentDir(dir)
             local screens = require("spaceport.screen").getActualScreens()
             for _, screen in pairs(screens) do
@@ -154,21 +154,21 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
     end,
 })
 vim.api.nvim_create_autocmd({ "VimResized" }, {
-    callback = function()
+    callback = function ()
         if require("spaceport.screen").isRendering() then
             require("spaceport.screen").render()
         end
     end,
 })
 vim.api.nvim_create_autocmd({ "BufLeave" }, {
-    callback = function()
+    callback = function ()
         if require("spaceport.screen").isRendering() then
             require("spaceport.screen").render()
         end
     end,
 })
 vim.api.nvim_create_autocmd({ "BufEnter" }, {
-    callback = function()
+    callback = function ()
         if require("spaceport.screen").isRendering() then
             require("spaceport.screen").render()
         end
@@ -176,7 +176,7 @@ vim.api.nvim_create_autocmd({ "BufEnter" }, {
 })
 
 vim.api.nvim_create_autocmd({ "QuitPre", "ExitPre" }, {
-    callback = function()
+    callback = function ()
         -- This is needed bc if there's an animation, it's calls to render() will override the quit
         if require("spaceport.screen").isRendering() then
             local screens = require("spaceport.screen").getActualScreens()
@@ -187,7 +187,7 @@ vim.api.nvim_create_autocmd({ "QuitPre", "ExitPre" }, {
                 end
             end
             -- Force quit
-            require('spaceport.screen').exit()
+            require("spaceport.screen").exit()
         end
     end,
 })

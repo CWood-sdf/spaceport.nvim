@@ -125,7 +125,8 @@ local hlNs = nil
 local hlId = 0
 local isExiting = false
 function M.isRendering()
-    return buf ~= nil and vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_get_current_buf() == buf and not isExiting
+    return buf ~= nil and vim.api.nvim_buf_is_valid(buf) and
+    vim.api.nvim_get_current_buf() == buf and not isExiting
 end
 
 function M.exit()
@@ -279,7 +280,8 @@ function M.getActualScreens()
     for _, v in ipairs(unfoundRemaps) do
         local msg = "Could not modify remap with key '" .. v .. "'"
         if remapKeys[v] ~= nil then
-            msg = msg .. " (Note: remap key was found in section '" .. remapKeys[v] .. "')"
+            msg = msg ..
+            " (Note: remap key was found in section '" .. remapKeys[v] .. "')"
         else
             msg = msg ..
                 " (Note: could not find any remap in a named section with that key, perhaps you meant to make a new map. If that's the case, replace `ogkey` with `key`)"
@@ -423,8 +425,9 @@ local function setRemaps(viewport, screens)
             if type(remap.action) == "function" then
                 local startLineCopy = viewport[i].rowStart
                 local indexCopy = i
-                vim.keymap.set(remap.mode, remap.key, function()
-                    local line = (vim.fn.line(".") or 0) - startLineCopy - (v.topBuffer or 0) -
+                vim.keymap.set(remap.mode, remap.key, function ()
+                    local line = (vim.fn.line(".") or 0) - startLineCopy -
+                        (v.topBuffer or 0) -
                         (v.title ~= nil and 1 or 0)
                     local callOutside = remap.callOutside
                     if callOutside == nil then
@@ -450,7 +453,7 @@ local function setRemaps(viewport, screens)
         end
         -- startLine = startLine + v.topBuffer + (v.title ~= nil and 1 or 0) + #lines
     end
-    for _, v in ipairs(require('spaceport').getConfig().shortcuts) do
+    for _, v in ipairs(require("spaceport").getConfig().shortcuts) do
         -- print("Setting shortcut " .. v .. " to index " .. i)
         if type(v) ~= "table" then
             log("Invalid shortcut: " .. vim.inspect(v) .. " expected string[2]")
@@ -465,18 +468,18 @@ local function setRemaps(viewport, screens)
             return
         end
         -- Basically, if its a table, then first key is key, second is a match to a directory
-        vim.keymap.set("n", v[1], function()
+        vim.keymap.set("n", v[1], function ()
             local pinned = require("spaceport.data").getPinnedData()
             for _, dir in ipairs(pinned) do
                 if string.match(dir.dir, v[2]) then
-                    require('spaceport.data').cd(dir)
+                    require("spaceport.data").cd(dir)
                     return
                 end
             end
             local mru = require("spaceport.data").getMruData()
             for _, dir in ipairs(mru) do
                 if string.match(dir.dir, v[2]) then
-                    require('spaceport.data').cd(dir)
+                    require("spaceport.data").cd(dir)
                     return
                 end
             end
@@ -680,10 +683,11 @@ local function higlightBuffer(gridLines)
                         local opts = vim.deepcopy(word.colorOpts)
                         opts._name = nil
                         if opts == nil then
-                            error("Unreachable [highlightBuffer colorOpts is nil]")
+                            error(
+                            "Unreachable [highlightBuffer colorOpts is nil]")
                         end
                         vim.api.nvim_set_hl(0, hlGroup, opts)
-                        if require('spaceport').getConfig().debug then
+                        if require("spaceport").getConfig().debug then
                             log("Created global highlight group: " .. hlGroup)
                         end
                     elseif hlNotExists then
@@ -697,7 +701,8 @@ local function higlightBuffer(gridLines)
                     hlId = hlId + 1
                     usedHighlights[optsStr] = hlGroup
                 end
-                vim.api.nvim_buf_add_highlight(buf, ns, hlGroup, row, col, col + #word[1])
+                vim.api.nvim_buf_add_highlight(buf, ns, hlGroup, row, col,
+                    col + #word[1])
             end
             col = col + #word[1]
         end
@@ -733,13 +738,13 @@ function M.render()
     ---@type table<integer, SpaceportViewport>
     local remapsViewport = {}
     require("spaceport.data").refreshData()
-    if require('spaceport').getConfig().debug then
+    if require("spaceport").getConfig().debug then
         log("Refresh took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
         startTime = vim.loop.hrtime()
     end
 
     local screens = M.getActualScreens()
-    if require('spaceport').getConfig().debug then
+    if require("spaceport").getConfig().debug then
         log("Screens took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
         startTime = vim.loop.hrtime()
     end
@@ -790,7 +795,7 @@ function M.render()
     width = vim.api.nvim_win_get_width(winid)
     height = vim.api.nvim_win_get_height(winid)
     vim.cmd("setlocal norelativenumber nonumber")
-    if require('spaceport').getConfig().debug then
+    if require("spaceport").getConfig().debug then
         log("Buf took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
         startTime = vim.loop.hrtime()
     end
@@ -803,7 +808,7 @@ function M.render()
             centerRow = remapsViewport[index].rowEnd + 1
         end
     end
-    if require('spaceport').getConfig().debug then
+    if require("spaceport").getConfig().debug then
         log("VRender took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
         startTime = vim.loop.hrtime()
     end
@@ -819,13 +824,13 @@ function M.render()
     vim.api.nvim_set_option_value("modifiable", false, {
         buf = buf,
     })
-    if require('spaceport').getConfig().debug then
+    if require("spaceport").getConfig().debug then
         log("Set lines took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
         startTime = vim.loop.hrtime()
     end
 
     higlightBuffer(gridLines)
-    if require('spaceport').getConfig().debug then
+    if require("spaceport").getConfig().debug then
         log("Highlights took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
         startTime = vim.loop.hrtime()
     end
@@ -833,12 +838,12 @@ function M.render()
         setRemaps(remapsViewport, screens)
         needsRemap = false
     end
-    if require('spaceport').getConfig().debug then
+    if require("spaceport").getConfig().debug then
         log("Remaps took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
         startTime = vim.loop.hrtime()
     end
     log("Total render took " .. (vim.loop.hrtime() - actualStart) / 1e6 .. "ms")
-    if require('spaceport').getConfig().debug then
+    if require("spaceport").getConfig().debug then
         log("")
     end
 end

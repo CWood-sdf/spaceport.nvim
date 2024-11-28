@@ -206,11 +206,11 @@ function M.refreshData()
             table.insert(pinnedData, insert)
         end
     end
-    table.sort(data, function(a, b)
+    table.sort(data, function (a, b)
         return a.time > b.time
     end)
 
-    table.sort(pinnedData, function(a, b)
+    table.sort(pinnedData, function (a, b)
         return a.pinNumber < b.pinNumber
     end)
 end
@@ -224,7 +224,7 @@ function M.getAllData()
     for _, v in pairs(pinnedData) do
         table.insert(ret, v)
     end
-    table.sort(ret, function(a, b)
+    table.sort(ret, function (a, b)
         return a.time > b.time
     end)
     return ret
@@ -300,7 +300,7 @@ function M.useWindowName()
         return
     end
     vim.fn.jobstart({ "tmux", "rename-window", currentDir.tmuxWindowName }, {
-        on_exit = function()
+        on_exit = function ()
         end,
     })
 end
@@ -316,7 +316,7 @@ function M.useSessionName()
         return
     end
     vim.fn.jobstart({ "tmux", "rename-session", currentDir.tmuxSessionName }, {
-        on_exit = function()
+        on_exit = function ()
         end,
     })
 end
@@ -331,7 +331,7 @@ function M.tmuxSplitWindowDown()
         return
     end
     vim.fn.jobstart({ "tmux", "split-window", "-c" .. currentDir.dir }, {
-        on_exit = function()
+        on_exit = function ()
         end,
     })
 end
@@ -346,7 +346,7 @@ function M.tmuxSplitWindowLeft()
         return
     end
     vim.fn.jobstart({ "tmux", "split-window", "-h", "-c" .. currentDir.dir }, {
-        on_exit = function()
+        on_exit = function ()
         end,
     })
 end
@@ -405,7 +405,8 @@ function M.cd(dir)
             local answer = vim.fn.input(
                 "It seems like "
                 .. dir.dir
-                .. " does not exist anymore, would you like it to be removed from spaceport? (y/n):"
+                ..
+                " does not exist anymore, would you like it to be removed from spaceport? (y/n):"
             )
             if answer == "y" then
                 M.removeDir(dir.dir)
@@ -431,7 +432,8 @@ function M.cd(dir)
             local answer = vim.fn.input(
                 "It seems like "
                 .. dir.dir
-                .. " does not exist anymore, would you like it to be removed from spaceport? (y/n):"
+                ..
+                " does not exist anymore, would you like it to be removed from spaceport? (y/n):"
             )
             if answer == "y" then
                 M.removeDir(dir.dir)

@@ -6,10 +6,10 @@ local pinned
 local function l(config)
     mru = require("spaceport.data").getMruData()
     pinned = require("spaceport.data").getPinnedData()
-    if require('spaceport')._getMaxRecentFiles() ~= 0 then
+    if require("spaceport")._getMaxRecentFiles() ~= 0 then
         local tmpMru = {}
         local i = 1
-        while #tmpMru + #pinned < require('spaceport')._getMaxRecentFiles() and #mru > 0 and #tmpMru < #mru do
+        while #tmpMru + #pinned < require("spaceport")._getMaxRecentFiles() and #mru > 0 and #tmpMru < #mru do
             table.insert(tmpMru, mru[i])
             i = i + 1
         end
@@ -40,15 +40,16 @@ local function l(config)
             { { require("spaceport")._getIcon("pinned") .. "Pinned", colorOpts = { _name = "SpaceportRecentsTitle" } } },
         }
         for _, v in ipairs(pinned) do
-            linesToDir[#lines + 1] = i
+            linesToDir[#lines+1] = i
             local prefix = require("spaceport")._getIcon("file")
             if v.isDir then prefix = require("spaceport")._getIcon("dir") end
             ---@type SpaceportWord[]
             local words = {
                 { prefix .. v.prettyDir, colorOpts = { _name = "SpaceportRecentsProject" } },
-                { i .. "",                      colorOpts = { _name = "SpaceportRecentsCount" } },
+                { i .. "",               colorOpts = { _name = "SpaceportRecentsCount" } },
             }
-            table.insert(lines, require("spaceport.screen").setWidthWords(words, largestLen))
+            table.insert(lines,
+                require("spaceport.screen").setWidthWords(words, largestLen))
             i = i + 1
         end
     end
@@ -61,8 +62,8 @@ local function l(config)
         if utils.isToday(v.time) then
             if currentTime ~= "Today" then
                 currentTime = "Today"
-                lines[#lines + 1] = ""
-                lines[#lines + 1] = {
+                lines[#lines+1] = ""
+                lines[#lines+1] = {
                     { require("spaceport")._getIcon("today") .. currentTime, colorOpts = { _name = "SpaceportRecentsTitle" } },
                 }
                 -- addLine(lines, currentTime, width)
@@ -73,8 +74,8 @@ local function l(config)
                 if lastView == "today" then
                     return lines
                 end
-                lines[#lines + 1] = ""
-                lines[#lines + 1] = {
+                lines[#lines+1] = ""
+                lines[#lines+1] = {
                     { require("spaceport")._getIcon("yesterday") .. currentTime, colorOpts = { _name = "SpaceportRecentsTitle" } },
                 }
             end
@@ -84,8 +85,8 @@ local function l(config)
                 if lastView == "today" or lastView == "yesterday" then
                     return lines
                 end
-                lines[#lines + 1] = ""
-                lines[#lines + 1] = {
+                lines[#lines+1] = ""
+                lines[#lines+1] = {
                     { require("spaceport")._getIcon("week") .. currentTime, colorOpts = { _name = "SpaceportRecentsTitle" } },
                 }
             end
@@ -95,8 +96,8 @@ local function l(config)
                 if lastView == "today" or lastView == "yesterday" or lastView == "pastWeek" then
                     return lines
                 end
-                lines[#lines + 1] = ""
-                lines[#lines + 1] = {
+                lines[#lines+1] = ""
+                lines[#lines+1] = {
                     { require("spaceport")._getIcon("month") .. currentTime, colorOpts = { _name = "SpaceportRecentsTitle" } },
                 }
             end
@@ -111,18 +112,18 @@ local function l(config)
                 then
                     return lines
                 end
-                lines[#lines + 1] = ""
-                lines[#lines + 1] = {
+                lines[#lines+1] = ""
+                lines[#lines+1] = {
                     { require("spaceport")._getIcon("long") .. currentTime, colorOpts = { _name = "SpaceportRecentsTitle" } },
                 }
             end
         end
-        linesToDir[#lines + 1] = i
+        linesToDir[#lines+1] = i
         local prefix = require("spaceport")._getIcon("file")
         if v.isDir then prefix = require("spaceport")._getIcon("dir") end
         local words = {
             { prefix .. v.prettyDir, colorOpts = { _name = "SpaceportRecentsProject" } },
-            { i .. "",                      colorOpts = { _name = "SpaceportRecentsCount" } },
+            { i .. "",               colorOpts = { _name = "SpaceportRecentsCount" } },
         }
         local line = require("spaceport.screen").setWidthWords(words, largestLen)
         table.insert(lines, line)
@@ -138,7 +139,7 @@ local r = {
         {
             key = "p",
             description = "Select project",
-            action = function(line, count)
+            action = function (line, count)
                 if count == 0 then
                     count = linesToDir[line] or 0
                 end
@@ -161,7 +162,7 @@ local r = {
         {
             key = "dd",
             description = "Delete project",
-            action = function(line, count)
+            action = function (line, count)
                 if count == 0 then
                     count = linesToDir[line]
                 end
@@ -185,7 +186,7 @@ local r = {
         {
             key = "t",
             description = "Toggle project tag",
-            action = function(line, count)
+            action = function (line, count)
                 if count == 0 then
                     count = linesToDir[line]
                 end
@@ -229,7 +230,7 @@ local r = {
             key = "J",
             description = "Move pin down",
             mode = "n",
-            action = function(line, count)
+            action = function (line, count)
                 line = linesToDir[line]
                 if line == nil then
                     print("Not hovering over a project")
@@ -269,7 +270,7 @@ local r = {
             key = "K",
             description = "Move pin up",
             mode = "n",
-            action = function(line, count)
+            action = function (line, count)
                 line = linesToDir[line]
                 if line == nil then
                     print("Not hovering over a project")
