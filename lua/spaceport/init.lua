@@ -36,9 +36,10 @@ local opts = {
         "remaps",
         "recents",
         "_global_remaps",
+        "hacker_news",
     },
-    icons = false,
-    maxRecentFiles = 0,
+    icons = true,
+    maxRecentFiles = vim.api.nvim_win_get_height(0),
     debug = false,
     shortcuts = {},
 }

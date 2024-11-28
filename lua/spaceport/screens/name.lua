@@ -186,7 +186,7 @@ local r = {
 	topBuffer = 1,
 	config = {
 		style = "hash",
-		gradient = "none"
+		gradient = "blue_green"
 	},
 
 }
