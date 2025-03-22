@@ -120,6 +120,9 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
             end
             local dir = nil
             for _, v in pairs(argv) do
+                if v == "." then
+                    v = vim.fn.getcwd()
+                end
                 local isDir = require("spaceport.data").isdir(v)
                 if not require("spaceport.data").isdir(v) then
                     v = vim.fn.fnamemodify(v, ":p") or ""
