@@ -193,8 +193,7 @@ function M._getIcon(icon)
         dir = " ",
         remaps = " ",
         pinned = " ",
-        today =
-        " ",
+        today = " ",
         yesterday = " ",
         week = " ",
         month = " ",
@@ -210,13 +209,15 @@ function M._getIcon(icon)
 end
 
 function M._projectEntryCommand()
-    if type(opts.projectEntry) == "string" then
-        local cmd = opts.projectEntry
-        ---@cast cmd string
-        vim.cmd(cmd)
-    elseif type(opts.projectEntry) == "function" then
-        opts.projectEntry()
-    end
+    local _, _ = pcall(function ()
+        if type(opts.projectEntry) == "string" then
+            local cmd = opts.projectEntry
+            ---@cast cmd string
+            vim.cmd(cmd)
+        elseif type(opts.projectEntry) == "function" then
+            opts.projectEntry()
+        end
+    end)
 end
 
 ---@return SpaceportConfig

@@ -126,7 +126,7 @@ local hlId = 0
 local isExiting = false
 function M.isRendering()
     return buf ~= nil and vim.api.nvim_buf_is_valid(buf) and
-    vim.api.nvim_get_current_buf() == buf and not isExiting
+        vim.api.nvim_get_current_buf() == buf and not isExiting
 end
 
 function M.exit()
@@ -281,7 +281,8 @@ function M.getActualScreens()
         local msg = "Could not modify remap with key '" .. v .. "'"
         if remapKeys[v] ~= nil then
             msg = msg ..
-            " (Note: remap key was found in section '" .. remapKeys[v] .. "')"
+                " (Note: remap key was found in section '" ..
+                remapKeys[v] .. "')"
         else
             msg = msg ..
                 " (Note: could not find any remap in a named section with that key, perhaps you meant to make a new map. If that's the case, replace `ogkey` with `key`)"
@@ -684,7 +685,7 @@ local function higlightBuffer(gridLines)
                         opts._name = nil
                         if opts == nil then
                             error(
-                            "Unreachable [highlightBuffer colorOpts is nil]")
+                                "Unreachable [highlightBuffer colorOpts is nil]")
                         end
                         vim.api.nvim_set_hl(0, hlGroup, opts)
                         if require("spaceport").getConfig().debug then
