@@ -116,6 +116,15 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
 
         -- don't open the dashboard if there is any text in the buffer
         if vim.bo.filetype ~= "netrw" then
+            local currentDir = vim.fn.getcwd()
+            vim.api.nvim_exec_autocmds("User", {
+                pattern = "SpaceportDonePre",
+                data = currentDir,
+            })
+            vim.api.nvim_exec_autocmds("User", {
+                pattern = "SpaceportDone",
+                data = currentDir,
+            })
             if vim.api.nvim_buf_line_count(buf) > 1 or #(vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] or "") > 0 then
                 return
             end
