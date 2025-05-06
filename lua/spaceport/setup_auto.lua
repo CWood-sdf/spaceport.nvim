@@ -115,8 +115,10 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
         local buf = vim.api.nvim_get_current_buf()
 
         -- don't open the dashboard if there is any text in the buffer
-        if vim.api.nvim_buf_line_count(buf) > 1 or #(vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] or "") > 0 then
-            return
+        if vim.bo.filetype ~= "netrw" then
+            if vim.api.nvim_buf_line_count(buf) > 1 or #(vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] or "") > 0 then
+                return
+            end
         end
 
         if vim.fn.argc() == 0 then
