@@ -114,23 +114,27 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
 
         local buf = vim.api.nvim_get_current_buf()
 
+        local win = vim.api.nvim_get_current_win()
+
+        local isFloating = not require("spaceport.screen").isMainWin(win)
+
         -- don't open the dashboard if there is any text in the buffer
-        if vim.bo.filetype ~= "netrw" then
+        if vim.bo.filetype ~= "netrw" and not isFloating then
             local currentDir = vim.fn.getcwd()
-            vim.api.nvim_exec_autocmds("User", {
-                pattern = "SpaceportDonePre",
-                data = currentDir,
-            })
-            vim.api.nvim_exec_autocmds("User", {
-                pattern = "SpaceportDone",
-                data = currentDir,
-            })
             if vim.api.nvim_buf_line_count(buf) > 1 or #(vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] or "") > 0 then
+                vim.api.nvim_exec_autocmds("User", {
+                    pattern = "SpaceportDonePre",
+                    data = currentDir,
+                })
+                vim.api.nvim_exec_autocmds("User", {
+                    pattern = "SpaceportDone",
+                    data = currentDir,
+                })
                 return
             end
         end
 
-        if vim.fn.argc() == 0 then
+        if vim.fn.argc() == 0 or isFloating then
             vim.api.nvim_exec_autocmds("User", {
                 pattern = "SpaceportEnter",
             })
