@@ -1,4 +1,4 @@
-*spaceport.txt*          For Neovim >= 0.8.0         Last change: 2025 June 04
+*spaceport.txt*         For Neovim >= 0.8.0        Last change: 2025 August 15
 
 ==============================================================================
 Table of Contents                                *spaceport-table-of-contents*
@@ -8,6 +8,7 @@ Table of Contents                                *spaceport-table-of-contents*
   - How                                         |spaceport-spaceport.nvim-how|
   - Tag System                           |spaceport-spaceport.nvim-tag-system|
   - Installation                       |spaceport-spaceport.nvim-installation|
+  - Defaults                               |spaceport-spaceport.nvim-defaults|
   - Performance                         |spaceport-spaceport.nvim-performance|
   - Usage                                     |spaceport-spaceport.nvim-usage|
   - Customization                     |spaceport-spaceport.nvim-customization|
@@ -62,7 +63,7 @@ making them only one keystroke away
 
 INSTALLATION                           *spaceport-spaceport.nvim-installation*
 
-lazy.nvim ~
+lazy.nvim
 
 >lua
     {
@@ -73,6 +74,9 @@ lazy.nvim ~
         lazy = false, -- load spaceport immediately
     }
 <
+
+
+DEFAULTS                                   *spaceport-spaceport.nvim-defaults*
 
 The default options are:
 
