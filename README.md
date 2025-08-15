@@ -22,8 +22,7 @@ On top of this, some projects can be bookmarked (as defined in your config), mak
 
 ## Installation
 
-<details>
-<summary>lazy.nvim</summary>
+lazy.nvim
 
 ```lua
 {
@@ -35,7 +34,7 @@ On top of this, some projects can be bookmarked (as defined in your config), mak
 }
 ```
 
-</details>
+## Defaults
 
 The default options are:
 

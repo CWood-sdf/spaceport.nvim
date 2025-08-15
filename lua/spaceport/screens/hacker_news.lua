@@ -19,20 +19,20 @@ vim.fn.jobstart("curl https://hacker-news.firebaseio.com/v0/topstories.json -s",
                 topStories[i] = { title = "Loading..." }
                 local iCopy = i + 1 - 1
                 vim.fn.jobstart(
-                "curl https://hacker-news.firebaseio.com/v0/item/" ..
-                data[i] .. ".json -s", {
-                    on_exit = function (_, _) end,
-                    on_stdout = function (_, d, _)
-                        if d[1] == "" then
-                            return
-                        end
-                        local item = vim.json.decode(d[1])
-                        topStories[iCopy] = item
-                        if not hasDone then
-                            require("spaceport.screen").render()
-                        end
-                    end,
-                })
+                    "curl https://hacker-news.firebaseio.com/v0/item/" ..
+                    data[i] .. ".json -s", {
+                        on_exit = function (_, _) end,
+                        on_stdout = function (_, d, _)
+                            if d[1] == "" then
+                                return
+                            end
+                            local item = vim.json.decode(d[1])
+                            topStories[iCopy] = item
+                            if not hasDone then
+                                require("spaceport.screen").render()
+                            end
+                        end,
+                    })
             end
         end,
     })

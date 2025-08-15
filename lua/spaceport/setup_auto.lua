@@ -153,7 +153,8 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
             end
             local dir = nil
             for _, v in pairs(argv) do
-                if v == "." then
+                local oilStart = "oil://"
+                if v == "." or v:sub(1, #oilStart) == oilStart then
                     v = vim.fn.getcwd()
                 end
                 local isDir = require("spaceport.data").isdir(v)

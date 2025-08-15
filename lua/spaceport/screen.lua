@@ -702,6 +702,10 @@ local function higlightBuffer(gridLines)
                     hlId = hlId + 1
                     usedHighlights[optsStr] = hlGroup
                 end
+                -- vim.api.nvim_buf_set_extmark(buf, ns, row, col, {
+                --     end_col = col + #word[1],
+                --     hl_group = hlGroup
+                -- })
                 vim.api.nvim_buf_add_highlight(buf, ns, hlGroup, row, col,
                     col + #word[1])
             end
