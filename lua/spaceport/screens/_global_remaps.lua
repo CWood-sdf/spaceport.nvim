@@ -12,6 +12,14 @@ local l = {
                 require("spaceport.screen").render()
             end,
         },
+        {
+            key = ".",
+            description = "Open current dir",
+            mode = "n",
+            action = function ()
+                require("spaceport.data").setCurrentDir(vim.fn.getcwd())
+            end,
+        }
     },
 }
 

@@ -2,21 +2,21 @@ local allCmds = {
     Spaceport = {},
 }
 local cmds = {
-    renameWindow = function (args)
+    renameWindow = function(args)
         local value = args[1]
         require("spaceport.data").renameWindow(value)
     end,
-    renameSession = function (args)
+    renameSession = function(args)
         local value = args[1]
         require("spaceport.data").renameSession(value)
     end,
-    verticalSplit = function (_)
+    verticalSplit = function(_)
         require("spaceport.data").tmuxSplitWindowDown()
     end,
-    horizontalSplit = function (_)
+    horizontalSplit = function(_)
         require("spaceport.data").tmuxSplitWindowLeft()
     end,
-    importOldfiles = function (args)
+    importOldfiles = function(args)
         local countStr = args[1]
         local count = nil
         if countStr ~= nil then
@@ -31,7 +31,7 @@ local cmds = {
 for k, _ in pairs(cmds) do
     allCmds.Spaceport[k] = {}
 end
-vim.api.nvim_create_user_command("Spaceport", function (opts)
+vim.api.nvim_create_user_command("Spaceport", function(opts)
     if #opts.fargs == 0 or opts.fargs == nil then
         vim.api.nvim_exec_autocmds("User", {
             pattern = "SpaceportEnter",
@@ -58,7 +58,7 @@ vim.api.nvim_create_user_command("Spaceport", function (opts)
     end
 end, {
     nargs = "*",
-    complete = function (working, current, _)
+    complete = function(working, current, _)
         local tempCmds = allCmds
         local i = 1
         local cmdStr = ""
@@ -98,13 +98,15 @@ end, {
     end,
 })
 vim.api.nvim_create_autocmd({ "UiEnter" }, {
-    callback = function ()
+    callback = function()
         require("spaceport").__timeStartup()
 
         local uis = vim.api.nvim_list_uis()
 
         -- headless
-        if #uis == 0 then return end
+        if #uis == 0 then
+            return
+        end
 
         -- Following stuff is yoinked from folke/snacks.nvim/lua/dashboard.lua
         -- don't open the dashboard if in TUI and input is piped
@@ -121,7 +123,11 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
         -- don't open the dashboard if there is any text in the buffer
         if vim.bo.filetype ~= "netrw" and not isFloating then
             local currentDir = vim.fn.getcwd()
-            if vim.api.nvim_buf_line_count(buf) > 1 or #(vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] or "") > 0 then
+            if
+                vim.api.nvim_buf_line_count(buf) > 1
+                or #(vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] or "")
+                    > 0
+            then
                 vim.api.nvim_exec_autocmds("User", {
                     pattern = "SpaceportDonePre",
                     data = currentDir,
@@ -191,21 +197,21 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
     end,
 })
 vim.api.nvim_create_autocmd({ "VimResized" }, {
-    callback = function ()
+    callback = function()
         if require("spaceport.screen").isRendering() then
             require("spaceport.screen").render()
         end
     end,
 })
 vim.api.nvim_create_autocmd({ "BufLeave" }, {
-    callback = function ()
+    callback = function()
         if require("spaceport.screen").isRendering() then
             require("spaceport.screen").render()
         end
     end,
 })
 vim.api.nvim_create_autocmd({ "BufEnter" }, {
-    callback = function ()
+    callback = function()
         if require("spaceport.screen").isRendering() then
             require("spaceport.screen").render()
         end
@@ -213,7 +219,7 @@ vim.api.nvim_create_autocmd({ "BufEnter" }, {
 })
 
 vim.api.nvim_create_autocmd({ "QuitPre", "ExitPre" }, {
-    callback = function ()
+    callback = function()
         -- This is needed bc if there's an animation, it's calls to render() will override the quit
         if require("spaceport.screen").isRendering() then
             local screens = require("spaceport.screen").getActualScreens()
