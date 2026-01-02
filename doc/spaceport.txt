@@ -1,4 +1,4 @@
-*spaceport.txt*         For Neovim >= 0.8.0        Last change: 2025 August 15
+*spaceport.txt*        For Neovim >= 0.8.0        Last change: 2026 January 02
 
 ==============================================================================
 Table of Contents                                *spaceport-table-of-contents*
@@ -198,11 +198,11 @@ reconfigured by changing the `sections` option. The default sections are:
 
 All the preconfigured sections are:
 
-- `_global_remaps`This section adds a few remaps that are universally useful, like being able to refresh the screen
-- `name`This section displays an ascii art "Spaceport" logo
-- `remaps`This section displays all the remaps that are defined as visible in all the other screens
-- `recents`This section displays the most recently used projects, as well as the pinned projects
-- `hacker_news`This section displays the top 5 stories on hacker news
+- `_global_remaps`: This section adds a few remaps that are universally useful, like being able to refresh the screen
+- `name`: This section displays an ascii art "Spaceport" logo
+- `remaps`: This section displays all the remaps that are defined as visible in all the other screens
+- `recents`: This section displays the most recently used projects, as well as the pinned projects
+- `hacker_news`: This section displays the top 5 stories on hacker news
 
 
 MODIFYING SECTIONS ~
@@ -260,7 +260,7 @@ MODIFYING THE NAME ASCII ART ~
 
 There are three different types of name ascii art provided currently:
 
-`hash`
+`hash`:
 
 >
     ### ###  #  ### ### ### ### ###  ###
@@ -270,7 +270,7 @@ There are three different types of name ascii art provided currently:
     ### #   # # ### ### #   ### #  #  #
 <
 
-`pipe`
+`pipe`:
 
 >
     ╔═╗┌─┐┌─┐┌─┐┌─┐┌─┐┌─┐┬─┐┌┬┐
@@ -278,7 +278,7 @@ There are three different types of name ascii art provided currently:
     ╚═╝┴  ┴ ┴└─┘└─┘┴  └─┘┴└─ ┴
 <
 
-and`lite`
+and `lite`:
 
 >
      _____                       ______          _
@@ -291,7 +291,7 @@ and`lite`
           |_|
 <
 
-thereare also two available gradient types available right now (`blue` and
+there are also two available gradient types available right now (`blue` and
 `blue_green`). the gradient and name style can be changed by modifying the
 `config` for the name screen:
 
@@ -309,7 +309,7 @@ thereare also two available gradient types available right now (`blue` and
 
 If you want to provide your own name and gradient, you can look at the
 definition for `local gradients` and `local styles` in
-`lua/spaceport/screen/name.lua`
+`lua/spaceport/screen/name.lua`:
 
 >lua
     sections = {
@@ -326,7 +326,7 @@ definition for `local gradients` and `local styles` in
 <
 
 
-DEFAULTSCREEN HIGHLIGHT GROUPS ~
+DEFAULT SCREEN HIGHLIGHT GROUPS ~
 
 If you want to change the highlighting of the recents or remaps sections, you
 can set any of the following highlight groups: `SpaceportRemapTitle`,
@@ -476,9 +476,9 @@ EVENTS                                       *spaceport-spaceport.nvim-events*
 
 Spaceport emits three events:
 
-- `SpaceportEnter`This event is emitted when spaceport is entered
-- `SpaceportDone`This event is emitted when a project is entered, or when neovim is started with a file or directory argument
-- `SpaceportDonePre`This event is emitted before a project is entered
+- `SpaceportEnter`: This event is emitted when spaceport is entered
+- `SpaceportDone`: This event is emitted when a project is entered, or when neovim is started with a file or directory argument
+- `SpaceportDonePre`: This event is emitted before a project is entered
 
 
 SPACEPORT BUFFER NAME         *spaceport-spaceport.nvim-spaceport-buffer-name*
