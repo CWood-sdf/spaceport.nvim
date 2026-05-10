@@ -1,4 +1,5 @@
 local M = {}
+
 ---@return number
 function M.getSeconds()
     return vim.fn.localtime()

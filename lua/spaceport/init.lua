@@ -24,6 +24,7 @@ local M = {}
 ---@field lastViewTime "pin"|"today"|"yesterday"|"pastWeek"|"pastMonth"|"later"
 ---@field debug boolean
 ---@field shortcuts string[][]
+---@field projectHomes string[]
 local opts = {
     lastViewTime = "later",
     replaceDirs = {},
@@ -42,6 +43,7 @@ local opts = {
     maxRecentFiles = vim.api.nvim_win_get_height(0),
     debug = false,
     shortcuts = {},
+    projectHomes = { "~" },
 }
 
 local lastClean = 0
@@ -82,6 +84,40 @@ function M.getStartupTime()
 end
 
 local hasInit = false
+
+---@param path string
+---@return string
+local function expandPath(path)
+    if path == "" then
+        return path
+    end
+    local expanded = vim.fn.expand(path)
+    return vim.fn.fnamemodify(expanded, ":p")
+end
+
+---@param homes string[]|string
+---@return string[]
+local function normalizeProjectHomes(homes)
+    local ret = {}
+    local seen = {}
+    if type(homes) == "string" then
+        homes = { homes }
+    end
+    for _, home in ipairs(homes or {}) do
+        if type(home) == "string" then
+            local normalized = expandPath(home)
+            if normalized ~= "" and not seen[normalized] then
+                seen[normalized] = true
+                table.insert(ret, normalized)
+            end
+        end
+    end
+    if #ret == 0 then
+        table.insert(ret, expandPath("~"))
+    end
+    return ret
+end
+
 ---@param _opts SpaceportConfig
 function M.setup(_opts)
     hasInit = true
@@ -91,6 +127,7 @@ function M.setup(_opts)
         end
         opts[k] = v
     end
+    opts.projectHomes = normalizeProjectHomes(opts.projectHomes)
     opts.logPath = vim.fn.fnamemodify(opts.logPath, ":p") or ""
     require("spaceport.setup_auto")
     vim.schedule(function ()
@@ -131,6 +168,12 @@ end
 ---@return (string|string[])[]
 function M._getIgnoreDirs()
     return opts.replaceDirs
+end
+
+---@return string[]
+function M._getProjectHomes()
+    opts.projectHomes = normalizeProjectHomes(opts.projectHomes)
+    return opts.projectHomes
 end
 
 ---@return string

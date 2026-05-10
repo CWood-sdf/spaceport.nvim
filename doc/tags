@@ -4,6 +4,7 @@ spaceport-spaceport.nvim-contributing	spaceport.txt	/*spaceport-spaceport.nvim-c
 spaceport-spaceport.nvim-customization	spaceport.txt	/*spaceport-spaceport.nvim-customization*
 spaceport-spaceport.nvim-defaults	spaceport.txt	/*spaceport-spaceport.nvim-defaults*
 spaceport-spaceport.nvim-events	spaceport.txt	/*spaceport-spaceport.nvim-events*
+spaceport-spaceport.nvim-healthchecks	spaceport.txt	/*spaceport-spaceport.nvim-healthchecks*
 spaceport-spaceport.nvim-how	spaceport.txt	/*spaceport-spaceport.nvim-how*
 spaceport-spaceport.nvim-importing-vim.v.oldfiles	spaceport.txt	/*spaceport-spaceport.nvim-importing-vim.v.oldfiles*
 spaceport-spaceport.nvim-installation	spaceport.txt	/*spaceport-spaceport.nvim-installation*

@@ -4,19 +4,53 @@ local conf = require("telescope.config").values
 local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
 
+---@param gitDir string
+---@return string
+local function toProjectDir(gitDir)
+    local normalized = gitDir:gsub("/+$", "")
+    if normalized:sub(-5) == "/.git" then
+        return normalized:sub(1, -6)
+    end
+    return vim.fn.fnamemodify(normalized, ":h")
+end
+
 return function (opts)
     opts = opts or require("telescope.themes").get_dropdown({})
+    local projectHomes = require("spaceport")._getProjectHomes()
+    local cmd = {
+        "fd",
+        "--type", "d",
+        "--hidden",
+        "--no-follow",
+        "--absolute-path",
+        "--regex", "^\\.git$",
+    }
+    for _, home in ipairs(projectHomes) do
+        table.insert(cmd, home)
+    end
+
+    local fdMatches = vim.fn.systemlist(cmd)
+    if vim.v.shell_error ~= 0 then
+        require("spaceport").log("spaceport.find failed to run fd")
+        return
+    end
+
+    local seen = {}
+    local projects = {}
+    for _, gitDir in ipairs(fdMatches) do
+        local projectDir = toProjectDir(gitDir)
+        if not seen[projectDir] then
+            seen[projectDir] = true
+            table.insert(projects, projectDir)
+        end
+    end
+
     pickers
         .new(opts, {
             prompt_title = "Find Spaceport Directory",
-            finder = finders.new_oneshot_job({ "find" }, {
+            finder = finders.new_table({
+                results = projects,
                 entry_maker = function (entry)
-                    if entry:gsub(".git", "") ~= entry then
-                        return nil
-                    end
-                    if entry:sub(1, 1) == "." then
-                        entry = vim.loop.cwd() .. entry:sub(2)
-                    end
                     return {
                         value = entry,
                         display = require("spaceport")._fixDir(entry),
