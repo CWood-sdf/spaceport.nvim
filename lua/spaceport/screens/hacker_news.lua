@@ -1,41 +1,54 @@
+local storyCount = 5
 local topStories = {}
 local hasDone = false
-local storyCount = 5
+local stdout = ""
+local substdout = {}
 for i = 1, storyCount do
     topStories[i] = { title = "Loading..." }
+    substdout[i] = ""
 end
 vim.fn.jobstart("curl https://hacker-news.firebaseio.com/v0/topstories.json -s",
     {
-        on_exit = function (_, _) end,
-        on_stdout = function (_, data, e)
-            if e ~= "stdout" then
-                return
-            end
-            if data[1] == "" then
-                return
-            end
-            data = vim.json.decode(data[1]) or {}
+        on_exit = function (_, _)
+
+            local data = vim.json.decode(stdout) or {}
             for i = 1, storyCount do
                 topStories[i] = { title = "Loading..." }
                 local iCopy = i + 1 - 1
                 vim.fn.jobstart(
                     "curl https://hacker-news.firebaseio.com/v0/item/" ..
                     data[i] .. ".json -s", {
-                        on_exit = function (_, _) end,
-                        on_stdout = function (_, d, _)
-                            if d[1] == "" then
-                                return
-                            end
-                            local item = vim.json.decode(d[1])
+                        on_exit = function (_, _) 
+
+                            local item = vim.json.decode(substdout[i])
                             topStories[iCopy] = item
                             if not hasDone then
                                 require("spaceport.screen").render()
                             end
                         end,
+                        on_stdout = function (_, d, _)
+                            if d[1] == "" then
+                                return
+                            end
+                            substdout[i] = substdout[i] .. d[1]
+                        end,
                     })
             end
+
+        end,
+        on_stdout = function (_, data, e)
+            if e ~= "stdout" then
+                return
+            end
+            stdout = stdout .. data[1]
+            if data[1] == "" then
+                return
+            end
+            local str = data[1]
         end,
     })
+
+
 
 ---@type SpaceportScreen
 return {
