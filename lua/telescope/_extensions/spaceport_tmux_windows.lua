@@ -15,7 +15,7 @@ return function (opts)
         .new(opts, {
             prompt_title = "Spaceport Tmux Windows",
             finder = finders.new_table({
-                results = require("spaceport.data").getAllData(),
+                results = data,
 
                 entry_maker = function (entry)
                     return {
@@ -29,8 +29,11 @@ return function (opts)
             ---@diagnostic disable-next-line: unused-local
             attach_mappings = function (prompt_bufnr, map)
                 actions.select_default:replace(function ()
-                    actions.close(prompt_bufnr)
                     local selection = action_state.get_selected_entry()
+                    if selection == nil then
+                        return
+                    end
+                    actions.close(prompt_bufnr)
                     require("spaceport.data").cd(selection.value)
                 end)
                 return true
