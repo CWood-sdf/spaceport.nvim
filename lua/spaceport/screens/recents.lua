@@ -4,6 +4,7 @@ local pinned
 ---@param config { [string]: any }
 ---@return (string|SpaceportWord[])[]
 local function l(config)
+    linesToDir = {}
     mru = require("spaceport.data").getMruData()
     pinned = require("spaceport.data").getPinnedData()
     if require("spaceport")._getMaxRecentFiles() ~= 0 then
@@ -164,10 +165,9 @@ local r = {
             description = "Delete project",
             action = function (line, count)
                 if count == 0 then
-                    count = linesToDir[line]
+                    count = linesToDir[line] or 0
                 end
-                if count ~= 0 then
-                    local data = require("spaceport.data").getRawData()
+                if count > 0 and count <= #pinned + #mru then
                     if count <= #pinned then
                         local d = pinned[count].dir
                         require("spaceport.data").removeDir(d)
@@ -188,21 +188,19 @@ local r = {
             description = "Toggle project tag",
             action = function (line, count)
                 if count == 0 then
-                    count = linesToDir[line]
+                    count = linesToDir[line] or 0
                 end
-                if count ~= 0 then
+                if count > 0 and count <= #pinned + #mru then
                     local data = require("spaceport.data").getRawData()
                     if count <= #pinned then
                         local d = pinned[count].dir
-                        for k, _ in pairs(data) do
-                            if k == d then
-                                data[k].pinNumber = 0
-                                require("spaceport.data").writeData(data)
-                                require("spaceport.screen").render()
-                                return
+                        local pin = data[d].pinNumber
+                        data[d].pinNumber = 0
+                        for _, entry in pairs(data) do
+                            if entry.pinNumber > pin then
+                                entry.pinNumber = entry.pinNumber - 1
                             end
                         end
-                        require("spaceport.screen").render()
                     else
                         local d = mru[count - #pinned].dir
                         local maxPin = 0
@@ -211,15 +209,10 @@ local r = {
                                 maxPin = v.pinNumber
                             end
                         end
-                        for k, _ in pairs(data) do
-                            if k == d then
-                                data[k].pinNumber = maxPin + 1
-                                require("spaceport.data").writeData(data)
-                                require("spaceport.screen").render()
-                                return
-                            end
-                        end
+                        data[d].pinNumber = maxPin + 1
                     end
+                    require("spaceport.data").writeData(data)
+                    require("spaceport.screen").render()
                 else
                     print("Not hovering over a project")
                 end
@@ -246,13 +239,10 @@ local r = {
                 end
                 -- print("line: " .. line)
                 -- print("count: " .. count)
-                local upperBound = line + count
+                local upperBound = math.min(line + count, #pinned)
                 local lowerBound = line
                 -- print("upperBound: " .. upperBound)
                 -- print("lowerBound: " .. lowerBound)
-                if lowerBound > #pinned then
-                    lowerBound = #pinned
-                end
                 -- print(vim.inspect(pinned))
                 for i = upperBound, lowerBound, -1 do
                     pinned[i].pinNumber = pinned[i].pinNumber - 1
