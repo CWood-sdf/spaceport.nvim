@@ -238,7 +238,7 @@ function M.getActualScreens()
                 end
                 if screen.remaps ~= nil then
                     for _, v in ipairs(screen.remaps) do
-                        if v.ogkey ~= nil then
+                        if v.ogkey ~= nil and v.ogkey ~= "" then
                             local found = false
                             for i, r in ipairs(conf.remaps) do
                                 if r.key == v.ogkey then
@@ -413,6 +413,8 @@ end
 -- }
 
 local needsRemap = true
+---@type table<integer, SpaceportViewport>
+local remapsViewport = {}
 
 ---@param viewport SpaceportViewport[]
 ---@param screens SpaceportScreen[]
@@ -424,10 +426,9 @@ local function setRemaps(viewport, screens)
     for i, v in ipairs(screens) do
         for _, remap in ipairs(v.remaps or {}) do
             if type(remap.action) == "function" then
-                local startLineCopy = viewport[i].rowStart
                 local indexCopy = i
                 vim.keymap.set(remap.mode, remap.key, function ()
-                    local line = (vim.fn.line(".") or 0) - startLineCopy -
+                    local line = vim.fn.line(".") - viewport[indexCopy].rowStart -
                         (v.topBuffer or 0) -
                         (v.title ~= nil and 1 or 0)
                     local callOutside = remap.callOutside
@@ -740,8 +741,6 @@ function M.render()
     local startTime = vim.loop.hrtime()
     ---@type SpaceportWord[][]
     local gridLines = {}
-    ---@type table<integer, SpaceportViewport>
-    local remapsViewport = {}
     require("spaceport.data").refreshData()
     if require("spaceport").getConfig().debug then
         log("Refresh took " .. (vim.loop.hrtime() - startTime) / 1e6 .. "ms")
