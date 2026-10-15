@@ -67,26 +67,26 @@ The default options are:
     lastViewTime = "later",
 
     -- The maximum number of directories to show in the recents section (0 means show all of them)
-    maxRecentFiles = 0,
+    maxRecentFiles = vim.api.nvim_win_get_height(0),
 
     -- The sections to show on the screen (see `Customization` for more info)
     sections = {
-        "_global_remaps",
         "name",
         "remaps",
         "recents",
+        "_global_remaps",
+        "hacker_news",
     },
 
     -- toggle or set file and directory icons.
     --  For example, the following can be used to set different icons `{ file = " ", dir = " ", remaps = " ", pinned = " ", today = " ", yesterday = " ", week = " ", month = " ", long = " ", news = "󱀄 " }`
-    icons = true
+    icons = true,
 
     -- For true speed, it has the type string[][],
     --  each element of the shortcuts array contains two strings, the first is the key, the second is a match string to a directory
     --   for example, I have ~/.config/nvim as shortcut f, so I can type `f` to go to my neovim dotfiles, this is set with { { "f", ".config/nvim" } }
-    shortcuts = {
-        { "f", ".config/nvim" },
-    },
+    shortcuts = {},
+    -- Example: shortcuts = { { "f", ".config/nvim" } },
 
     --- Set to true to have more verbose logging
     debug = false,
@@ -94,7 +94,7 @@ The default options are:
     -- The path to the log file
     logPath = vim.fn.stdpath("log") .. "/spaceport.log",
     -- How many hours to preserve each log entry for
-    logPreserveHours = 24,
+    logPreserveHrs = 24,
 
 }
 ```
@@ -247,7 +247,7 @@ sections = {
 }
 ```
 
-If you want to provide your own name and gradient, you can look at the definition for `local gradients` and `local styles` in `lua/spaceport/screen/name.lua`:
+If you want to provide your own name and gradient, you can look at the definition for `local gradients` and `local styles` in `lua/spaceport/screens/name.lua`:
 
 ```lua
 sections = {
