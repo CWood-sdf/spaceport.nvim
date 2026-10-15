@@ -121,7 +121,8 @@ vim.api.nvim_create_autocmd({ "UiEnter" }, {
         local isFloating = not require("spaceport.screen").isMainWin(win)
 
         -- don't open the dashboard if there is any text in the buffer
-        if vim.bo.filetype ~= "netrw" and not isFloating then
+        if vim.fn.argc() == 0
+            and vim.bo.filetype ~= "netrw" and not isFloating then
             local currentDir = vim.fn.getcwd()
             if
                 vim.api.nvim_buf_line_count(buf) > 1
