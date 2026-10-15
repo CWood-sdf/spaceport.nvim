@@ -17,7 +17,21 @@ local l = {
             description = "Open current dir",
             mode = "n",
             action = function ()
-                require("spaceport.data").setCurrentDir(vim.fn.getcwd())
+                local dir = vim.fn.getcwd()
+                local data = require("spaceport.data")
+                for _, entry in ipairs(data.getAllData()) do
+                    if entry.dir == dir then
+                        data.cd(entry)
+                        return
+                    end
+                end
+                data.cd({
+                    dir = dir,
+                    prettyDir = require("spaceport")._fixDir(dir),
+                    isDir = true,
+                    pinNumber = 0,
+                    time = require("spaceport.utils").getSeconds(),
+                })
             end,
         }
     },
